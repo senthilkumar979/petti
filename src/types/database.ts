@@ -66,6 +66,8 @@ export interface Database {
             | "10 days before";
           category: string;
           paidFor: string;
+          provider: string | null;
+          note: string | null;
           lastModified: string;
           modifiedBy: string;
           createdAt: string;
@@ -103,6 +105,8 @@ export interface Database {
             | "10 days before";
           category: string;
           paidFor: string;
+          provider?: string | null;
+          note?: string | null;
           lastModified?: string;
           modifiedBy?: string;
           createdAt?: string;
@@ -140,6 +144,8 @@ export interface Database {
             | "10 days before";
           category?: string;
           paidFor?: string;
+          provider?: string | null;
+          note?: string | null;
           lastModified?: string;
           modifiedBy?: string;
           createdAt?: string;

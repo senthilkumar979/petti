@@ -33,7 +33,7 @@ export const ListView: React.FC<ListViewProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      {subscriptions.map((subscription, index) => {
+      {subscriptions.map((subscription) => {
         const renewalStatus = getRenewalStatus(subscription.renewalDate);
         const statusColor = getStatusColor(renewalStatus);
 
@@ -96,7 +96,25 @@ export const ListView: React.FC<ListViewProps> = ({
                       {getUserName(users, subscription.paidFor)}
                     </span>
                   </div>
+
+                  {subscription.provider && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded-full bg-blue-300 flex items-center justify-center">
+                        <span className="text-xs text-blue-600">P</span>
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        {subscription.provider}
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {subscription.note && (
+                  <div className="mb-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
+                    <span className="font-medium">Note: </span>
+                    {subscription.note}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-2">
                   <Badge

@@ -34,7 +34,7 @@ export const GridView: React.FC<GridViewProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {subscriptions.map((subscription, index) => {
+      {subscriptions.map((subscription) => {
         const renewalStatus = getRenewalStatus(subscription.renewalDate);
         const statusColor = getStatusColor(renewalStatus);
 
@@ -103,6 +103,24 @@ export const GridView: React.FC<GridViewProps> = ({
                   {getUserName(users, subscription.paidFor)}
                 </span>
               </div>
+
+              {subscription.provider && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Provider</span>
+                  <span className="text-sm text-gray-900">
+                    {subscription.provider}
+                  </span>
+                </div>
+              )}
+
+              {subscription.note && (
+                <div className="flex items-start justify-between">
+                  <span className="text-sm text-gray-500">Note</span>
+                  <span className="text-sm text-gray-900 text-right max-w-32 truncate">
+                    {subscription.note}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 mb-4">
@@ -129,7 +147,7 @@ export const GridView: React.FC<GridViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t flex justify-center">
               <EditDeleteActions
                 onEdit={() => onEdit(subscription)}
                 onDelete={() => onDelete(subscription)}

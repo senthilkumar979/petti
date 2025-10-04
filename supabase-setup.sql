@@ -172,6 +172,8 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     "reminderThree" TEXT NOT NULL CHECK ("reminderThree" IN ('1 day before', '2 days before', '3 days before', '1 week before', '10 days before')),
     category TEXT NOT NULL,
     "paidFor" TEXT NOT NULL,
+    provider TEXT,
+    note TEXT,
     "lastModified" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "modifiedBy" TEXT NOT NULL,
     "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -199,6 +201,8 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_renewal_date ON public.subscription
 CREATE INDEX IF NOT EXISTS idx_subscriptions_category ON public.subscriptions(category);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_paid_for ON public.subscriptions("paidFor");
 CREATE INDEX IF NOT EXISTS idx_subscriptions_periodicity ON public.subscriptions(periodicity);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_provider ON public.subscriptions(provider);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_note ON public.subscriptions(note);
 
 -- Create function to update updatedAt timestamp for subscriptions
 CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()

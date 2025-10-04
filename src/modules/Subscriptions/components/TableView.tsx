@@ -48,10 +48,10 @@ export const TableView: React.FC<TableViewProps> = ({
               Renewal Date
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Category
+              Paid For
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Paid For
+              Provider
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
@@ -62,7 +62,7 @@ export const TableView: React.FC<TableViewProps> = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {subscriptions.map((subscription, index) => {
+          {subscriptions.map((subscription) => {
             const renewalStatus = getRenewalStatus(subscription.renewalDate);
             const statusColor = getStatusColor(renewalStatus);
 
@@ -76,6 +76,9 @@ export const TableView: React.FC<TableViewProps> = ({
                           ?.charAt(0)
                           .toUpperCase() +
                           subscription.nameOfSubscription?.slice(1)}
+                        <div className="mt-2">
+                          {getCategoryName(categories, subscription.category)}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -102,16 +105,16 @@ export const TableView: React.FC<TableViewProps> = ({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {getCategoryName(categories, subscription.category)}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
                     <span className="text-sm text-gray-900">
                       {getUserName(users, subscription.paidFor)}
                     </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {subscription.provider || "-"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

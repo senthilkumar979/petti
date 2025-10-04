@@ -40,6 +40,9 @@ export default function SubscriptionsPage() {
   const [subscriptionToDelete, setSubscriptionToDelete] =
     useState<Subscription | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewMode, setViewMode] = useState<
+    "list" | "table" | "grid" | "calendar"
+  >("calendar");
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -126,8 +129,24 @@ export default function SubscriptionsPage() {
           throw result.error;
         }
 
-        // Refresh the subscriptions list
-        await loadData();
+        // Update local state instead of refetching
+        if (editingSubscription) {
+          // Update existing subscription in local state
+          setSubscriptions((prev) =>
+            prev.map((sub) =>
+              sub.id === editingSubscription.id
+                ? { ...sub, ...data, updatedAt: new Date().toISOString() }
+                : sub
+            )
+          );
+        } else {
+          // Add new subscription to local state
+          if (result.data) {
+            setSubscriptions((prev) => [...prev, result.data as Subscription]);
+          }
+        }
+
+        // Close the drawer
         setIsDrawerOpen(false);
         setEditingSubscription(null);
       } catch (err) {
@@ -138,7 +157,7 @@ export default function SubscriptionsPage() {
         setIsSubmitting(false);
       }
     },
-    [editingSubscription, createSubscription, updateSubscription, loadData]
+    [editingSubscription, createSubscription, updateSubscription]
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -152,8 +171,11 @@ export default function SubscriptionsPage() {
         throw error;
       }
 
-      // Refresh the subscriptions list
-      await loadData();
+      // Remove subscription from local state
+      setSubscriptions((prev) =>
+        prev.filter((sub) => sub.id !== subscriptionToDelete.id)
+      );
+
       setDeleteModalOpen(false);
       setSubscriptionToDelete(null);
     } catch (err) {
@@ -180,7 +202,15 @@ export default function SubscriptionsPage() {
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
       subscription.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      subscription.periodicity.toLowerCase().includes(searchQuery.toLowerCase())
+      subscription.periodicity
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (subscription.provider &&
+        subscription.provider
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (subscription.note &&
+        subscription.note.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (authLoading || loading) {
@@ -277,6 +307,8 @@ export default function SubscriptionsPage() {
             error={error || undefined}
             onEdit={handleEditSubscription}
             onDelete={handleDeleteSubscription}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         </Card>
 

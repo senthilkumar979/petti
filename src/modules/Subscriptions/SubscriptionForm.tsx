@@ -47,6 +47,8 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
     reminderThree: initialData?.reminderThree || "1 week before",
     category: initialData?.category || "",
     paidFor: initialData?.paidFor || users[0].id,
+    provider: initialData?.provider || "",
+    note: initialData?.note || "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -93,34 +95,30 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm()) {
+      return;
+    }
 
-      if (!validateForm()) {
-        return;
-      }
-
-      try {
-        await onSubmit({
-          nameOfSubscription: formData.nameOfSubscription.trim(),
-          periodicity: formData.periodicity as Subscription["periodicity"],
-          amount: Number(formData.amount),
-          currency: formData.currency,
-          renewalDate: formData.renewalDate,
-          reminderOne: formData.reminderOne as Subscription["reminderOne"],
-          reminderTwo: formData.reminderTwo as Subscription["reminderTwo"],
-          reminderThree:
-            formData.reminderThree as Subscription["reminderThree"],
-          category: formData.category,
-          paidFor: formData.paidFor,
-        });
-      } catch (error) {
-        console.error("Error submitting subscription:", error);
-      }
-    },
-    [formData, validateForm, onSubmit]
-  );
+    try {
+      await onSubmit({
+        nameOfSubscription: formData.nameOfSubscription.trim(),
+        periodicity: formData.periodicity as Subscription["periodicity"],
+        amount: Number(formData.amount),
+        currency: formData.currency,
+        renewalDate: formData.renewalDate,
+        reminderOne: formData.reminderOne as Subscription["reminderOne"],
+        reminderTwo: formData.reminderTwo as Subscription["reminderTwo"],
+        reminderThree: formData.reminderThree as Subscription["reminderThree"],
+        category: formData.category,
+        paidFor: formData.paidFor,
+        provider: formData.provider.trim() || null,
+        note: formData.note.trim() || null,
+      });
+    } catch (error) {
+      console.error("Error submitting subscription:", error);
+    }
+  }, [formData, validateForm, onSubmit]);
 
   const categoryOptions: SelectOption[] = categories.map((cat) => ({
     value: cat.id,
@@ -133,7 +131,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
   }));
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Subscription Name */}
         <div className="md:col-span-2">
@@ -261,16 +259,36 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             required
           />
         </div>
+
+        {/* Provider */}
+        <div>
+          <Input
+            label="Provider"
+            value={formData.provider}
+            onChange={(e) => handleInputChange("provider", e.target.value)}
+            placeholder="Enter provider name (e.g., Netflix, Spotify)"
+            error={errors.provider}
+          />
+        </div>
+
+        {/* Note */}
+        <div className="md:col-span-2">
+          <Input
+            label="Note"
+            value={formData.note}
+            onChange={(e) => handleInputChange("note", e.target.value)}
+            placeholder="Add any additional notes about this subscription"
+            error={errors.note}
+          />
+        </div>
       </div>
 
       <Drawer.Action
         onClose={onCancel}
-        onConfirm={() =>
-          handleSubmit(new Event("submit") as unknown as React.FormEvent)
-        }
+        onConfirm={handleSubmit}
         submitLabel={loading ? "Saving..." : "Save Subscription"}
         cancelLabel="Cancel"
       />
-    </form>
+    </div>
   );
 };

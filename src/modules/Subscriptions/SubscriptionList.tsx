@@ -21,6 +21,8 @@ interface SubscriptionListProps {
   error?: string;
   onEdit: (subscription: Subscription) => void;
   onDelete: (subscription: Subscription) => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 export const SubscriptionList: React.FC<SubscriptionListProps> = ({
@@ -31,8 +33,9 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({
   error,
   onEdit,
   onDelete,
+  viewMode,
+  onViewModeChange,
 }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -129,7 +132,10 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({
             Subscriptions ({subscriptions.length})
           </h3>
         </div>
-        <ViewModeSelector currentView={viewMode} onViewChange={setViewMode} />
+        <ViewModeSelector
+          currentView={viewMode}
+          onViewChange={onViewModeChange}
+        />
       </div>
 
       {/* Content based on view mode */}
