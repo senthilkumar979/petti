@@ -74,13 +74,6 @@ export default function NotesPage() {
     }
   }, [user, authLoading, router]);
 
-  // Load notes and categories on component mount
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -113,6 +106,13 @@ export default function NotesPage() {
       setLoading(false);
     }
   }, [fetchNotes, fetchNoteCategories, fetchAllUsers]);
+
+  // Load notes and categories on component mount
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const handleAddNote = useCallback(() => {
     setEditingNote(null);

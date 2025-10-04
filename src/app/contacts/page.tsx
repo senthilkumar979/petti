@@ -9,19 +9,8 @@ import { Header } from "@/components/organisms/Header/Header";
 import { ContactForm } from "@/modules/Contacts/ContactForm";
 import { ContactDetails } from "@/modules/Contacts/ContactDetails";
 import { useAuth } from "@/lib/auth-context";
-import { Contact } from "@/types/database";
-import {
-  Plus,
-  Search,
-  Users,
-  Grid3X3,
-  List,
-  Mail,
-  Phone,
-  MapPin,
-  Building,
-  Calendar,
-} from "lucide-react";
+import { Contact, ContactInsert } from "@/types/database";
+import { Plus, Search, Users, Grid3X3, List } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -57,13 +46,6 @@ export default function ContactsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Load contacts on component mount
-  useEffect(() => {
-    if (user) {
-      loadContacts();
-    }
-  }, [user]);
-
   const loadContacts = useCallback(async () => {
     try {
       setLoading(true);
@@ -81,6 +63,13 @@ export default function ContactsPage() {
       setLoading(false);
     }
   }, [fetchContacts]);
+
+  // Load contacts on component mount
+  useEffect(() => {
+    if (user) {
+      loadContacts();
+    }
+  }, [user, loadContacts]);
 
   const handleAddContact = useCallback(() => {
     setEditingContact(null);
@@ -107,7 +96,7 @@ export default function ContactsPage() {
 
   const handleSubmitContact = useCallback(
     async (
-      data: Omit<Contact, "id" | "ownedBy" | "createdAt" | "updatedAt">
+      data: Omit<ContactInsert, "id" | "ownedBy" | "createdAt" | "updatedAt">
     ) => {
       try {
         setIsSubmitting(true);
@@ -117,7 +106,10 @@ export default function ContactsPage() {
         if (editingContact) {
           result = await updateContact(editingContact.id, data);
         } else {
-          result = await createContact(data);
+          result = await createContact({
+            ...data,
+            ownedBy: user?.id || "",
+          });
         }
 
         if (result.error) {
@@ -147,7 +139,7 @@ export default function ContactsPage() {
         setIsSubmitting(false);
       }
     },
-    [editingContact, createContact, updateContact]
+    [editingContact, createContact, updateContact, user?.id]
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -207,10 +199,6 @@ export default function ContactsPage() {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const getCategoryColor = (category: "work" | "personal") => {
-    return category === "work" ? "blue" : "green";
   };
 
   if (authLoading || loading) {

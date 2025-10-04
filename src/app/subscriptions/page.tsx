@@ -51,13 +51,6 @@ export default function SubscriptionsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Load data on component mount
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -91,6 +84,13 @@ export default function SubscriptionsPage() {
       setLoading(false);
     }
   }, [fetchSubscriptions, fetchSubscriptionCategories, fetchAllUsers]);
+
+  // Load data on component mount
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const handleAddSubscription = useCallback(() => {
     setEditingSubscription(null);
@@ -183,7 +183,7 @@ export default function SubscriptionsPage() {
         err instanceof Error ? err.message : "Failed to delete subscription"
       );
     }
-  }, [subscriptionToDelete, deleteSubscription, loadData]);
+  }, [subscriptionToDelete, deleteSubscription]);
 
   const handleCloseDrawer = useCallback(() => {
     setIsDrawerOpen(false);

@@ -18,9 +18,7 @@ interface CalendarViewProps {
 export const CalendarView: React.FC<CalendarViewProps> = ({
   subscriptions,
   categories,
-  users,
   onEdit,
-  onDelete,
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 

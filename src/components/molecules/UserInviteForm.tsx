@@ -8,7 +8,6 @@ import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/atoms/Avatar";
 import { UserPlus, Upload, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const userInviteSchema = z.object({
   email: z
@@ -55,8 +54,6 @@ export const UserInviteForm = ({
     resolver: zodResolver(userInviteSchema),
   });
 
-  const watchedPicture = watch("picture");
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -82,7 +79,7 @@ export const UserInviteForm = ({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (err) {
+    } catch {
       // Error handling is done in parent component
     }
   };

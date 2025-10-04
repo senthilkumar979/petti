@@ -5,7 +5,6 @@ import { Card } from "@/components/atoms/Card";
 import { Input } from "@/components/atoms/Input";
 import { Header } from "@/components/organisms/Header/Header";
 import { useAuth } from "@/lib/auth-context";
-import { User } from "@/types/database";
 import { Camera, Mail, Calendar, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/atoms/Avatar";
 import { User, UserPlus, Mail, Calendar, UserCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { User as UserType } from "@/types/database";
 
 interface UsersListProps {

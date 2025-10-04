@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { User as UserType, UserInsert } from "@/types/database";
@@ -89,7 +89,7 @@ export const useUsers = () => {
       body: JSON.stringify({
         email: userData.email,
         name: userData.name,
-        inviterName: currentUser.name || currentUser.email,
+        inviterName: currentUser.user_metadata?.name || currentUser.email,
         inviterEmail: currentUser.email,
       }),
     });
