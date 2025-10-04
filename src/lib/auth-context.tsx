@@ -31,6 +31,10 @@ interface AuthContextType {
   fetchUserProfile: (
     userId: string
   ) => Promise<{ data: User | null; error: unknown }>;
+  updateUser: (
+    userId: string,
+    userData: { name?: string; picture?: string | null }
+  ) => Promise<{ error: unknown }>;
   fetchAllUsers: () => Promise<{ data: User[] | null; error: unknown }>;
   // Subscription management functions
   fetchSubscriptions: () => Promise<{
@@ -119,6 +123,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Error fetching user profile:", error);
       return { data: null, error };
+    }
+  };
+
+  const updateUser = async (
+    userId: string,
+    userData: { name?: string; picture?: string | null }
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...userData,
+        lastUpdated: now,
+        updatedBy: user?.id || null,
+      };
+
+      const { error } = await supabase
+        .from("users")
+        .update(updateData)
+        .eq("id", userId);
+
+      if (error) {
+        console.error("Error updating user:", error);
+        return { error };
+      }
+
+      // Refresh the user profile after update
+      await fetchUserProfile(userId);
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return { error };
     }
   };
 
@@ -438,6 +474,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createUserProfile,
     createFirstUserProfile,
     fetchUserProfile,
+    updateUser,
     fetchAllUsers,
     fetchSubscriptions,
     createSubscription,
