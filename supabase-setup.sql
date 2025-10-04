@@ -219,6 +219,64 @@ CREATE TRIGGER update_subscriptions_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_subscriptions_updated_at();
 
+-- Create contacts table
+CREATE TABLE IF NOT EXISTS public.contacts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    "primaryEmail" TEXT,
+    "secondaryEmail" TEXT,
+    "primaryPhone" TEXT,
+    "secondaryPhone" TEXT,
+    designation TEXT,
+    company TEXT,
+    location TEXT,
+    "lastContacted" DATE,
+    notes TEXT,
+    category TEXT NOT NULL CHECK (category IN ('work', 'personal')),
+    referrer TEXT,
+    "ownedBy" TEXT NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS for contacts
+ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for contacts
+CREATE POLICY "Allow read access to contacts" ON public.contacts
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert access to contacts" ON public.contacts
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow update access to contacts" ON public.contacts
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Allow delete access to contacts" ON public.contacts
+    FOR DELETE USING (true);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_contacts_name ON public.contacts(name);
+CREATE INDEX IF NOT EXISTS idx_contacts_category ON public.contacts(category);
+CREATE INDEX IF NOT EXISTS idx_contacts_owned_by ON public.contacts("ownedBy");
+CREATE INDEX IF NOT EXISTS idx_contacts_company ON public.contacts(company);
+CREATE INDEX IF NOT EXISTS idx_contacts_primary_email ON public.contacts("primaryEmail");
+
+-- Create function to update updatedAt timestamp for contacts
+CREATE OR REPLACE FUNCTION update_contacts_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW."updatedAt" = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updatedAt for contacts
+CREATE TRIGGER update_contacts_updated_at 
+    BEFORE UPDATE ON public.contacts 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_contacts_updated_at();
+
 -- Create storage bucket for avatars
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
 

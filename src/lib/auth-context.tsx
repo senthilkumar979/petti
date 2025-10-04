@@ -9,6 +9,9 @@ import {
   SubscriptionCategory,
   SubscriptionInsert,
   SubscriptionUpdate,
+  Contact,
+  ContactInsert,
+  ContactUpdate,
 } from "@/types/database";
 
 interface AuthContextType {
@@ -53,6 +56,19 @@ interface AuthContextType {
     data: SubscriptionCategory[] | null;
     error: unknown;
   }>;
+  // Contact management functions
+  fetchContacts: () => Promise<{
+    data: Contact[] | null;
+    error: unknown;
+  }>;
+  createContact: (
+    contactData: ContactInsert
+  ) => Promise<{ data: Contact | null; error: unknown }>;
+  updateContact: (
+    id: string,
+    contactData: ContactUpdate
+  ) => Promise<{ data: Contact | null; error: unknown }>;
+  deleteContact: (id: string) => Promise<{ error: unknown }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -464,6 +480,97 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Contact management functions
+  const fetchContacts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching contacts:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createContact = async (contactData: ContactInsert) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...contactData,
+        ownedBy: user?.id || "",
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("contacts")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating contact:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating contact:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateContact = async (id: string, contactData: ContactUpdate) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...contactData,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("contacts")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating contact:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteContact = async (id: string) => {
+    try {
+      const { error } = await supabase.from("contacts").delete().eq("id", id);
+
+      if (error) {
+        console.error("Error deleting contact:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      return { error };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -481,6 +588,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateSubscription,
     deleteSubscription,
     fetchSubscriptionCategories,
+    fetchContacts,
+    createContact,
+    updateContact,
+    deleteContact,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -172,6 +172,62 @@ export interface Database {
           updatedAt?: string;
         };
       };
+      contacts: {
+        Row: {
+          id: string;
+          name: string;
+          primaryEmail: string | null;
+          secondaryEmail: string | null;
+          primaryPhone: string | null;
+          secondaryPhone: string | null;
+          designation: string | null;
+          company: string | null;
+          location: string | null;
+          lastContacted: string | null;
+          notes: string | null;
+          category: "work" | "personal";
+          referrer: string | null;
+          ownedBy: string;
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          primaryEmail?: string | null;
+          secondaryEmail?: string | null;
+          primaryPhone?: string | null;
+          secondaryPhone?: string | null;
+          designation?: string | null;
+          company?: string | null;
+          location?: string | null;
+          lastContacted?: string | null;
+          notes?: string | null;
+          category: "work" | "personal";
+          referrer?: string | null;
+          ownedBy: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          primaryEmail?: string | null;
+          secondaryEmail?: string | null;
+          primaryPhone?: string | null;
+          secondaryPhone?: string | null;
+          designation?: string | null;
+          company?: string | null;
+          location?: string | null;
+          lastContacted?: string | null;
+          notes?: string | null;
+          category?: "work" | "personal";
+          referrer?: string | null;
+          ownedBy?: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
     };
   };
 }
@@ -192,3 +248,7 @@ export type SubscriptionCategoryInsert =
   Database["public"]["Tables"]["subscription-categories"]["Insert"];
 export type SubscriptionCategoryUpdate =
   Database["public"]["Tables"]["subscription-categories"]["Update"];
+
+export type Contact = Database["public"]["Tables"]["contacts"]["Row"];
+export type ContactInsert = Database["public"]["Tables"]["contacts"]["Insert"];
+export type ContactUpdate = Database["public"]["Tables"]["contacts"]["Update"];
