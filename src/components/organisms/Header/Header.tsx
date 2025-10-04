@@ -88,6 +88,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                 Contacts
               </Link>
             </li>
+            <li>
+              <Link className="text-gray-700 hover:text-gray-900" href="/notes">
+                Notes
+              </Link>
+            </li>
           </ul>
         </div>
 

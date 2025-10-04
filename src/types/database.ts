@@ -228,6 +228,61 @@ export interface Database {
           updatedAt?: string;
         };
       };
+      "note-categories": {
+        Row: {
+          id: string;
+          name: string;
+          color: string | null;
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          color?: string | null;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          color?: string | null;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
+      notes: {
+        Row: {
+          id: string;
+          heading: string;
+          content: string;
+          categoryId: string;
+          lastUpdatedDate: string;
+          lastUpdatedBy: string;
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          heading: string;
+          content: string;
+          categoryId: string;
+          lastUpdatedDate?: string;
+          lastUpdatedBy: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          heading?: string;
+          content?: string;
+          categoryId?: string;
+          lastUpdatedDate?: string;
+          lastUpdatedBy?: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
     };
   };
 }
@@ -252,3 +307,14 @@ export type SubscriptionCategoryUpdate =
 export type Contact = Database["public"]["Tables"]["contacts"]["Row"];
 export type ContactInsert = Database["public"]["Tables"]["contacts"]["Insert"];
 export type ContactUpdate = Database["public"]["Tables"]["contacts"]["Update"];
+
+export type NoteCategory =
+  Database["public"]["Tables"]["note-categories"]["Row"];
+export type NoteCategoryInsert =
+  Database["public"]["Tables"]["note-categories"]["Insert"];
+export type NoteCategoryUpdate =
+  Database["public"]["Tables"]["note-categories"]["Update"];
+
+export type Note = Database["public"]["Tables"]["notes"]["Row"];
+export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
+export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];

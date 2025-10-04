@@ -81,7 +81,7 @@ body {
 }
 
 input,
-select {
+select, .tiptap {
   color: #111827;
 }
 

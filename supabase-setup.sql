@@ -277,6 +277,106 @@ CREATE TRIGGER update_contacts_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_contacts_updated_at();
 
+-- Create note-categories table
+CREATE TABLE IF NOT EXISTS public."note-categories" (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    color VARCHAR(7),
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS for note-categories
+ALTER TABLE public."note-categories" ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for note-categories
+CREATE POLICY "Allow read access to note categories" ON public."note-categories"
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert access to note categories" ON public."note-categories"
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow update access to note categories" ON public."note-categories"
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Allow delete access to note categories" ON public."note-categories"
+    FOR DELETE USING (true);
+
+-- Insert default note categories
+INSERT INTO public."note-categories" (name, color) VALUES
+    ('Personal', '#3B82F6'),
+    ('Work', '#10B981'),
+    ('Ideas', '#F59E0B'),
+    ('Research', '#8B5CF6'),
+    ('Meeting Notes', '#EF4444'),
+    ('To-Do', '#6B7280')
+ON CONFLICT (name) DO NOTHING;
+
+-- Create notes table
+CREATE TABLE IF NOT EXISTS public.notes (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    heading TEXT NOT NULL,
+    content TEXT NOT NULL,
+    "categoryId" UUID NOT NULL REFERENCES public."note-categories"(id) ON DELETE CASCADE,
+    "lastUpdatedDate" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "lastUpdatedBy" TEXT NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS for notes
+ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for notes
+CREATE POLICY "Allow read access to notes" ON public.notes
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert access to notes" ON public.notes
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow update access to notes" ON public.notes
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Allow delete access to notes" ON public.notes
+    FOR DELETE USING (true);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_notes_heading ON public.notes(heading);
+CREATE INDEX IF NOT EXISTS idx_notes_category_id ON public.notes("categoryId");
+CREATE INDEX IF NOT EXISTS idx_notes_last_updated_by ON public.notes("lastUpdatedBy");
+CREATE INDEX IF NOT EXISTS idx_notes_last_updated_date ON public.notes("lastUpdatedDate");
+
+-- Create function to update updatedAt timestamp for note-categories
+CREATE OR REPLACE FUNCTION update_note_categories_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW."updatedAt" = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updatedAt for note-categories
+CREATE TRIGGER update_note_categories_updated_at 
+    BEFORE UPDATE ON public."note-categories" 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_note_categories_updated_at();
+
+-- Create function to update updatedAt timestamp for notes
+CREATE OR REPLACE FUNCTION update_notes_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW."updatedAt" = NOW();
+    NEW."lastUpdatedDate" = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updatedAt for notes
+CREATE TRIGGER update_notes_updated_at 
+    BEFORE UPDATE ON public.notes 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_notes_updated_at();
+
 -- Create storage bucket for avatars
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
 

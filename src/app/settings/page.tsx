@@ -11,7 +11,7 @@ import { UserInviteForm } from "../../components/molecules/UserInviteForm";
 import Drawer from "../../components/molecules/Drawer";
 import { useUsers } from "../../hooks/useUsers";
 
-type TabType = "users" | "subscription" | "document";
+type TabType = "users" | "subscription" | "document" | "notes";
 
 export default function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -64,6 +64,11 @@ export default function SettingsPage() {
       id: "document" as TabType,
       label: "Document Categories",
       description: "Manage document categories",
+    },
+    {
+      id: "notes" as TabType,
+      label: "Notes Categories",
+      description: "Manage note categories and colors",
     },
   ];
 
@@ -119,6 +124,13 @@ export default function SettingsPage() {
                 tableName="document-categories"
                 title="Document Categories"
                 description="Manage the categories for organizing your documents and files."
+              />
+            )}
+            {activeTab === "notes" && (
+              <CategoriesTab
+                tableName="note-categories"
+                title="Notes Categories"
+                description="Manage the categories and colors for organizing your notes."
               />
             )}
           </div>

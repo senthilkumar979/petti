@@ -12,6 +12,12 @@ import {
   Contact,
   ContactInsert,
   ContactUpdate,
+  Note,
+  NoteInsert,
+  NoteUpdate,
+  NoteCategory,
+  NoteCategoryInsert,
+  NoteCategoryUpdate,
 } from "@/types/database";
 
 interface AuthContextType {
@@ -69,6 +75,32 @@ interface AuthContextType {
     contactData: ContactUpdate
   ) => Promise<{ data: Contact | null; error: unknown }>;
   deleteContact: (id: string) => Promise<{ error: unknown }>;
+  // Note management functions
+  fetchNotes: () => Promise<{
+    data: Note[] | null;
+    error: unknown;
+  }>;
+  createNote: (
+    noteData: NoteInsert
+  ) => Promise<{ data: Note | null; error: unknown }>;
+  updateNote: (
+    id: string,
+    noteData: NoteUpdate
+  ) => Promise<{ data: Note | null; error: unknown }>;
+  deleteNote: (id: string) => Promise<{ error: unknown }>;
+  // Note category management functions
+  fetchNoteCategories: () => Promise<{
+    data: NoteCategory[] | null;
+    error: unknown;
+  }>;
+  createNoteCategory: (
+    categoryData: NoteCategoryInsert
+  ) => Promise<{ data: NoteCategory | null; error: unknown }>;
+  updateNoteCategory: (
+    id: string,
+    categoryData: NoteCategoryUpdate
+  ) => Promise<{ data: NoteCategory | null; error: unknown }>;
+  deleteNoteCategory: (id: string) => Promise<{ error: unknown }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -571,6 +603,223 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Note management functions
+  const fetchNotes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("notes")
+        .select(
+          `
+          *,
+          note_categories:categoryId (
+            id,
+            name,
+            color
+          )
+        `
+        )
+        .order("lastUpdatedDate", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching notes:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createNote = async (noteData: NoteInsert) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...noteData,
+        lastUpdatedBy: user?.id || "",
+        lastUpdatedDate: now,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("notes")
+        .insert(insertData)
+        .select(
+          `
+          *,
+          note_categories:categoryId (
+            id,
+            name,
+            color
+          )
+        `
+        )
+        .single();
+
+      if (error) {
+        console.error("Error creating note:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating note:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateNote = async (id: string, noteData: NoteUpdate) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...noteData,
+        lastUpdatedBy: user?.id || "",
+        lastUpdatedDate: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("notes")
+        .update(updateData)
+        .eq("id", id)
+        .select(
+          `
+          *,
+          note_categories:categoryId (
+            id,
+            name,
+            color
+          )
+        `
+        )
+        .single();
+
+      if (error) {
+        console.error("Error updating note:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating note:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    try {
+      const { error } = await supabase.from("notes").delete().eq("id", id);
+
+      if (error) {
+        console.error("Error deleting note:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      return { error };
+    }
+  };
+
+  // Note category management functions
+  const fetchNoteCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("note-categories")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching note categories:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching note categories:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createNoteCategory = async (categoryData: NoteCategoryInsert) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...categoryData,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("note-categories")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating note category:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating note category:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateNoteCategory = async (
+    id: string,
+    categoryData: NoteCategoryUpdate
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...categoryData,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("note-categories")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating note category:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating note category:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteNoteCategory = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("note-categories")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting note category:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting note category:", error);
+      return { error };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -592,6 +841,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createContact,
     updateContact,
     deleteContact,
+    fetchNotes,
+    createNote,
+    updateNote,
+    deleteNote,
+    fetchNoteCategories,
+    createNoteCategory,
+    updateNoteCategory,
+    deleteNoteCategory,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
