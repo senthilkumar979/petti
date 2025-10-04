@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import {
@@ -122,38 +128,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Reset loading state on mount to prevent stale loading states
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      }
-      setLoading(false);
-    };
-
-    getInitialSession();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      } else {
-        setUserProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    setLoading(true);
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("users")
@@ -172,7 +152,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Error fetching user profile:", error);
       return { data: null, error };
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchUserProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error("Error getting initial session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
+    getInitialSession();
+
+    return () => clearTimeout(timeoutId);
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        try {
+          await fetchUserProfile(session.user.id);
+        } catch (error) {
+          console.error("Error fetching user profile on auth change:", error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
+  }, [fetchUserProfile]);
 
   const updateUser = async (
     userId: string,
