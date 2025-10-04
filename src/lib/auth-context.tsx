@@ -1,0 +1,450 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "./supabase";
+import {
+  User,
+  Subscription,
+  SubscriptionCategory,
+  SubscriptionInsert,
+  SubscriptionUpdate,
+} from "@/types/database";
+
+interface AuthContextType {
+  user: SupabaseUser | null;
+  userProfile: User | null;
+  loading: boolean;
+  signUp: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ error: unknown }>;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+  signOut: () => Promise<void>;
+  createUserProfile: (
+    userData: Omit<User, "id" | "addedOn" | "lastUpdated">
+  ) => Promise<{ error: unknown }>;
+  createFirstUserProfile: (
+    userData: Omit<User, "id" | "addedOn" | "lastUpdated">
+  ) => Promise<{ error: unknown }>;
+  fetchUserProfile: (
+    userId: string
+  ) => Promise<{ data: User | null; error: unknown }>;
+  fetchAllUsers: () => Promise<{ data: User[] | null; error: unknown }>;
+  // Subscription management functions
+  fetchSubscriptions: () => Promise<{
+    data: Subscription[] | null;
+    error: unknown;
+  }>;
+  createSubscription: (
+    subscriptionData: SubscriptionInsert
+  ) => Promise<{ data: Subscription | null; error: unknown }>;
+  updateSubscription: (
+    id: string,
+    subscriptionData: SubscriptionUpdate
+  ) => Promise<{ data: Subscription | null; error: unknown }>;
+  deleteSubscription: (id: string) => Promise<{ error: unknown }>;
+  fetchSubscriptionCategories: () => Promise<{
+    data: SubscriptionCategory[] | null;
+    error: unknown;
+  }>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial session
+    const getInitialSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      }
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        return { data: null, error };
+      }
+
+      setUserProfile(data);
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return { data: null, error };
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("addedOn", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching users:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return { data: null, error };
+    }
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const createUserProfile = async (
+    userData: Omit<User, "id" | "addedOn" | "lastUpdated">
+  ) => {
+    try {
+      console.log("Creating user profile for:", userData.email);
+
+      // Get the current user's ID
+      const {
+        data: { user: currentUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      console.log("Auth check result:", {
+        currentUser: !!currentUser,
+        authError,
+      });
+
+      if (authError) {
+        console.error("Auth error:", authError);
+        return { error: authError };
+      }
+
+      if (!currentUser) {
+        console.log("No authenticated user found");
+        return {
+          error: new Error(
+            "No authenticated user found. Please try signing up again."
+          ),
+        };
+      }
+
+      console.log("Creating profile for user ID:", currentUser.id);
+
+      const now = new Date().toISOString();
+      const insertData = {
+        id: currentUser.id,
+        ...userData,
+        addedOn: now,
+        lastUpdated: now,
+      };
+
+      console.log("Inserting data:", insertData);
+
+      // Try to create the user profile directly
+      const { data, error } = await supabase
+        .from("users")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Database error creating user profile:", error);
+        console.error("Error details:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+
+        // If it's an RLS error, provide a helpful message
+        if (
+          error.message.includes("row-level security") ||
+          error.message.includes("RLS")
+        ) {
+          return {
+            error: new Error(
+              "Row Level Security is blocking user creation. Please run the SQL script to disable RLS temporarily, create your first user, then re-enable RLS."
+            ),
+          };
+        }
+
+        return { error };
+      }
+
+      console.log("User profile created successfully:", data);
+      return { error: null };
+    } catch (error) {
+      console.error("Unexpected error creating user profile:", error);
+      return { error };
+    }
+  };
+
+  // Alternative function for first user creation (bypasses auth check)
+  const createFirstUserProfile = async (
+    userData: Omit<User, "id" | "addedOn" | "lastUpdated">
+  ) => {
+    try {
+      console.log("Creating first user profile for:", userData.email);
+
+      // Generate a random ID for the first user
+      const userId = `first-user-${Date.now()}`;
+
+      const now = new Date().toISOString();
+      const insertData = {
+        id: userId,
+        ...userData,
+        addedOn: now,
+        lastUpdated: now,
+      };
+
+      console.log("Inserting first user data:", insertData);
+
+      // Try to create the user profile directly
+      const { data, error } = await supabase
+        .from("users")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Database error creating first user profile:", error);
+        console.error("Error details:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+
+        return { error };
+      }
+
+      console.log("First user profile created successfully:", data);
+      return { error: null };
+    } catch (error) {
+      console.error("Unexpected error creating first user profile:", error);
+      return { error };
+    }
+  };
+
+  // Subscription management functions
+  const fetchSubscriptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("createdAt", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching subscriptions:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createSubscription = async (subscriptionData: SubscriptionInsert) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...subscriptionData,
+        lastModified: now,
+        modifiedBy: user?.id || "",
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating subscription:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateSubscription = async (
+    id: string,
+    subscriptionData: SubscriptionUpdate
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...subscriptionData,
+        lastModified: now,
+        modifiedBy: user?.id || "",
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating subscription:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteSubscription = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("subscriptions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting subscription:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting subscription:", error);
+      return { error };
+    }
+  };
+
+  const fetchSubscriptionCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("subscription-categories")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching subscription categories:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching subscription categories:", error);
+      return { data: null, error };
+    }
+  };
+
+  const value: AuthContextType = {
+    user,
+    userProfile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    createUserProfile,
+    createFirstUserProfile,
+    fetchUserProfile,
+    fetchAllUsers,
+    fetchSubscriptions,
+    createSubscription,
+    updateSubscription,
+    deleteSubscription,
+    fetchSubscriptionCategories,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
