@@ -177,7 +177,13 @@ export interface DrawerProps {
 // Component props types
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "tertiary" | "ghost" | "destructive" | "outline";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "tertiary"
+    | "ghost"
+    | "destructive"
+    | "outline";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   leftIcon?: React.ReactNode;

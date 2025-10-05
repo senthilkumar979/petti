@@ -58,10 +58,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
         ) : (
-          leftIcon && <span className="mr-2">{leftIcon}</span>
+          leftIcon && <span className={cn(children && "mr-2")}>{leftIcon}</span>
         )}
         {children}
-        {!loading && rightIcon && <span className="ml-2">{rightIcon}</span>}
+        {!loading && rightIcon && (
+          <span className={cn(children && "ml-2")}>{rightIcon}</span>
+        )}
       </button>
     );
   }

@@ -283,6 +283,76 @@ export interface Database {
           updatedAt?: string;
         };
       };
+      documents: {
+        Row: {
+          id: string;
+          name: string;
+          category: string;
+          owner: string;
+          lastModifiedDate: string;
+          lastModifiedBy: string;
+          createdDate: string;
+          createdBy: string;
+          validity: string | null;
+          mimeType: string;
+          content: string;
+          isPreDefined: boolean;
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          category: string;
+          owner: string;
+          lastModifiedDate?: string;
+          lastModifiedBy: string;
+          createdDate?: string;
+          createdBy: string;
+          validity?: string | null;
+          mimeType: string;
+          content: string;
+          isPreDefined?: boolean;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          category?: string;
+          owner?: string;
+          lastModifiedDate?: string;
+          lastModifiedBy?: string;
+          createdDate?: string;
+          createdBy?: string;
+          validity?: string | null;
+          mimeType?: string;
+          content?: string;
+          isPreDefined?: boolean;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
+      "document-categories": {
+        Row: {
+          id: string;
+          name: string;
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
     };
   };
 }
@@ -318,3 +388,16 @@ export type NoteCategoryUpdate =
 export type Note = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
 export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
+
+export type Document = Database["public"]["Tables"]["documents"]["Row"];
+export type DocumentInsert =
+  Database["public"]["Tables"]["documents"]["Insert"];
+export type DocumentUpdate =
+  Database["public"]["Tables"]["documents"]["Update"];
+
+export type DocumentCategory =
+  Database["public"]["Tables"]["document-categories"]["Row"];
+export type DocumentCategoryInsert =
+  Database["public"]["Tables"]["document-categories"]["Insert"];
+export type DocumentCategoryUpdate =
+  Database["public"]["Tables"]["document-categories"]["Update"];

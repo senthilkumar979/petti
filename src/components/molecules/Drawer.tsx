@@ -38,7 +38,7 @@ const Drawer = Object.assign(
     title,
     description,
     children,
-    side = "bottom",
+    side = "right",
   }: DrawerProps) => {
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={onClose} direction={side}>

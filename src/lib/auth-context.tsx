@@ -24,6 +24,12 @@ import {
   NoteCategory,
   NoteCategoryInsert,
   NoteCategoryUpdate,
+  Document,
+  DocumentInsert,
+  DocumentUpdate,
+  DocumentCategory,
+  DocumentCategoryInsert,
+  DocumentCategoryUpdate,
 } from "@/types/database";
 
 interface AuthContextType {
@@ -107,6 +113,32 @@ interface AuthContextType {
     categoryData: NoteCategoryUpdate
   ) => Promise<{ data: NoteCategory | null; error: unknown }>;
   deleteNoteCategory: (id: string) => Promise<{ error: unknown }>;
+  // Document management functions
+  fetchDocuments: () => Promise<{
+    data: Document[] | null;
+    error: unknown;
+  }>;
+  createDocument: (
+    documentData: DocumentInsert
+  ) => Promise<{ data: Document | null; error: unknown }>;
+  updateDocument: (
+    id: string,
+    documentData: DocumentUpdate
+  ) => Promise<{ data: Document | null; error: unknown }>;
+  deleteDocument: (id: string) => Promise<{ error: unknown }>;
+  // Document category management functions
+  fetchDocumentCategories: () => Promise<{
+    data: DocumentCategory[] | null;
+    error: unknown;
+  }>;
+  createDocumentCategory: (
+    categoryData: DocumentCategoryInsert
+  ) => Promise<{ data: DocumentCategory | null; error: unknown }>;
+  updateDocumentCategory: (
+    id: string,
+    categoryData: DocumentCategoryUpdate
+  ) => Promise<{ data: DocumentCategory | null; error: unknown }>;
+  deleteDocumentCategory: (id: string) => Promise<{ error: unknown }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -850,6 +882,197 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Document management functions
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .order("createdDate", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching documents:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createDocument = async (documentData: DocumentInsert) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...documentData,
+        createdDate: now,
+        lastModifiedDate: now,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("documents")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating document:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating document:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateDocument = async (id: string, documentData: DocumentUpdate) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...documentData,
+        lastModifiedDate: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("documents")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating document:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating document:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteDocument = async (id: string) => {
+    try {
+      const { error } = await supabase.from("documents").delete().eq("id", id);
+
+      if (error) {
+        console.error("Error deleting document:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      return { error };
+    }
+  };
+
+  // Document category management functions
+  const fetchDocumentCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("document-categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching document categories:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error fetching document categories:", error);
+      return { data: null, error };
+    }
+  };
+
+  const createDocumentCategory = async (
+    categoryData: DocumentCategoryInsert
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      const insertData = {
+        ...categoryData,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("document-categories")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating document category:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error creating document category:", error);
+      return { data: null, error };
+    }
+  };
+
+  const updateDocumentCategory = async (
+    id: string,
+    categoryData: DocumentCategoryUpdate
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      const updateData = {
+        ...categoryData,
+        updatedAt: now,
+      };
+
+      const { data, error } = await supabase
+        .from("document-categories")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating document category:", error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error updating document category:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteDocumentCategory = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("document-categories")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting document category:", error);
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting document category:", error);
+      return { error };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -879,6 +1102,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createNoteCategory,
     updateNoteCategory,
     deleteNoteCategory,
+    fetchDocuments,
+    createDocument,
+    updateDocument,
+    deleteDocument,
+    fetchDocumentCategories,
+    createDocumentCategory,
+    updateDocumentCategory,
+    deleteDocumentCategory,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
