@@ -19,6 +19,7 @@ import {
   Plus,
   Search,
   Trash2,
+  Upload,
   User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -333,9 +334,9 @@ export default function DocumentsPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
           <p className="mt-2 text-gray-600">
             Manage your important documents and files
@@ -344,8 +345,8 @@ export default function DocumentsPage() {
 
         {/* Filters and Search */}
         <Card className="mb-6">
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="p-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <Input
                 placeholder="Search documents..."
                 value={searchQuery}
@@ -362,48 +363,6 @@ export default function DocumentsPage() {
                 onChange={(e) => setSelectedOwner(e.target.value)}
                 options={ownerOptions}
               />
-              <div className="flex space-x-2">
-                <Button
-                  variant={filter === "all" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("all")}
-                >
-                  All
-                </Button>
-                <Button
-                  variant={filter === "predefined" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("predefined")}
-                >
-                  Pre-defined
-                </Button>
-                <Button
-                  variant={filter === "userdefined" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("userdefined")}
-                >
-                  User-defined
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <Button
-                  variant={viewMode === "grid" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  Grid
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  List
-                </Button>
-              </div>
               <Button
                 onClick={() => {
                   setEditingDocument(null);
@@ -427,10 +386,36 @@ export default function DocumentsPage() {
                   fileInput.click();
                   document.body.removeChild(fileInput);
                 }}
-                leftIcon={<Plus className="h-4 w-4" />}
+                leftIcon={<Upload className="h-4 w-4" />}
               >
                 Upload Document
               </Button>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-2">
+                <Button
+                  variant={filter === "all" ? "primary" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter("all")}
+                >
+                  All
+                </Button>
+                <Button
+                  variant={filter === "predefined" ? "primary" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter("predefined")}
+                >
+                  Pre-defined
+                </Button>
+                <Button
+                  variant={filter === "userdefined" ? "primary" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter("userdefined")}
+                >
+                  User-defined
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

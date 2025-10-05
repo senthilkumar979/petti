@@ -27,30 +27,33 @@ export const PreDefinedDocumentsList: React.FC<
 }) => {
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Pre-defined Documents
-      </h2>
-      <p className="text-gray-600 mb-6">
-        Common document types that you can upload and manage
-      </p>
-
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          onClick={() => onViewStyleChange("grid")}
-          className={viewStyle === "grid" ? "bg-gray-200" : ""}
-          leftIcon={<Grid className="h-4 w-4" />}
-        >
-          Grid
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => onViewStyleChange("table")}
-          className={viewStyle === "table" ? "bg-gray-200" : ""}
-          leftIcon={<Table className="h-4 w-4" />}
-        >
-          Table
-        </Button>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Pre-defined Documents
+          </h2>
+          <p className="text-gray-600">
+            Common document types that you can upload and manage
+          </p>
+        </div>
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            onClick={() => onViewStyleChange("grid")}
+            className={viewStyle === "grid" ? "bg-gray-200" : ""}
+            leftIcon={<Grid className="h-4 w-4" />}
+          >
+            Grid
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => onViewStyleChange("table")}
+            className={viewStyle === "table" ? "bg-gray-200" : ""}
+            leftIcon={<Table className="h-4 w-4" />}
+          >
+            Table
+          </Button>
+        </div>
       </div>
 
       {viewStyle === "grid" ? (
