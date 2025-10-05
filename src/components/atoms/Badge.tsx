@@ -36,7 +36,7 @@ export const variants = [
 ];
 
 export interface BadgeProps {
-  size: "small" | "medium" | "large";
+  size: "xs" | "small" | "medium" | "large";
   variant: string;
   className?: string;
   children: React.ReactNode;
@@ -49,6 +49,7 @@ export const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const sizeClasses = {
+    xs: "px-1 py-0.5 text-xs",
     small: "px-2 py-1 text-xs",
     medium: "px-3 py-1.5 text-sm",
     large: "px-4 py-2 text-base",

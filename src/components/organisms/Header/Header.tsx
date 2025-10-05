@@ -3,6 +3,7 @@
 import { DropdownMenu } from "@/components/molecules/DropdownMenu";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import { Badge } from "../../atoms/Badge";
 import { useHandleMenu } from "./useHandleMenu";
 
 /**
@@ -55,10 +56,13 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         {/* App Name - Left Side */}
         <div className="flex items-center">
           <h1 className="text-xl font-bold text-gray-900">PETTI</h1>
+          <Badge variant="warning" size="xs" className="ml-4">
+            v0.1.0-beta
+          </Badge>
         </div>
 
         <div>
-          <ul className="flex items-center space-x-4">
+          <ul className="flex items-center space-x-10">
             <li>
               <Link className="text-gray-700 hover:text-gray-900" href="/">
                 Home
