@@ -97,19 +97,18 @@ function createEmailTemplate(
           <h3 style="margin-top: 0; color: #495057;">Subscription Details:</h3>
           <ul style="list-style: none; padding: 0;">
             <li style="margin: 8px 0;"><strong>Name:</strong> ${
-              subscription.nameOfSubscription
+              `<span style="display: inline-block; padding: 4px 8px; background-color: #00b3ee; color: white; border-radius: 4px;">${subscription.nameOfSubscription}</span>`
             }</li>
-            <li style="margin: 8px 0;"><strong>Amount:</strong> ${
-              subscription.currency
-            } ${subscription.amount}</li>
-            <li style="margin: 8px 0;"><strong>Renewal Date:</strong> ${new Date(
-              subscription.renewalDate
-            ).toLocaleDateString()}</li>
-            <li style="margin: 8px 0;"><strong>Periodicity:</strong> ${
-              subscription.periodicity
-            }</li>
+            <li style="margin: 8px 0;"><strong>Amount:</strong> <span style="display: inline-block; padding: 4px 8px; background-color: #4CAF50; color: white; border-radius: 4px;">${subscription.currency} ${subscription.amount}</span></li>
+            </li>
+            <li style="margin: 8px 0;"><strong>Renewal Date:</strong>
+            <span style="display: inline-block; padding: 4px 8px; background-color: #800080; color: white; border-radius: 4px;">${new Date(subscription.renewalDate).toLocaleDateString()}</span>
+            </li>
+            <li style="margin: 8px 0;"><strong>Periodicity:</strong>
+              <span style="display: inline-block; padding: 4px 8px; background-color: #ff6347; color: white; border-radius: 4px;">${subscription.periodicity}</span>
+            </li>
             <li style="margin: 8px 0;"><strong>Category:</strong> ${
-              categoryMap.get(subscription.category) || subscription.category
+              `<span style="display: inline-block; padding: 4px 8px; background-color: #667eea; color: white; border-radius: 4px;">${categoryMap.get(subscription.category) || subscription.category}</span>`
             }</li>
             ${
               subscription.provider
