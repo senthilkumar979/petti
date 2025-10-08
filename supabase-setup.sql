@@ -410,11 +410,11 @@ CREATE TABLE IF NOT EXISTS public.smtp_config (
     secure BOOLEAN NOT NULL DEFAULT false,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
-    fromName TEXT NOT NULL,
-    fromEmail TEXT NOT NULL,
-    isActive BOOLEAN NOT NULL DEFAULT false,
-    createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    "fromName" TEXT NOT NULL,
+    "fromEmail" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 -- Enable Row Level Security (RLS) for smtp_config
 ALTER TABLE public.smtp_config ENABLE ROW LEVEL SECURITY;
@@ -436,15 +436,15 @@ CREATE TRIGGER update_smtp_config_updated_at BEFORE
 UPDATE ON public.smtp_config FOR EACH ROW EXECUTE FUNCTION update_smtp_config_updated_at();
 -- Create index for better performance on smtp_config
 CREATE INDEX IF NOT EXISTS idx_smtp_config_provider ON public.smtp_config(provider);
-CREATE INDEX IF NOT EXISTS idx_smtp_config_active ON public.smtp_config(isActive);
+CREATE INDEX IF NOT EXISTS idx_smtp_config_active ON public.smtp_config("isActive");
 CREATE INDEX IF NOT EXISTS idx_smtp_config_created_at ON public.smtp_config("createdAt");
 -- Ensure only one active configuration at a time
 CREATE OR REPLACE FUNCTION ensure_single_active_smtp_config() RETURNS TRIGGER AS $$ BEGIN -- If the new record is being set as active, deactivate all others
-    IF NEW.isActive = true THEN
+    IF NEW."isActive" = true THEN
 UPDATE public.smtp_config
-SET isActive = false
+SET "isActive" = false
 WHERE id != NEW.id
-    AND isActive = true;
+    AND "isActive" = true;
 END IF;
 RETURN NEW;
 END;
