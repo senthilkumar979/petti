@@ -10,8 +10,9 @@ import { UsersList } from "../../components/molecules/UsersList";
 import { UserInviteForm } from "../../components/molecules/UserInviteForm";
 import Drawer from "../../components/molecules/Drawer";
 import { useUsers } from "../../hooks/useUsers";
+import EmailSettings from "../../components/organisms/EmailSettings";
 
-type TabType = "users" | "subscription" | "document" | "notes";
+type TabType = "users" | "subscription" | "document" | "notes" | "email";
 
 export default function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -69,6 +70,11 @@ export default function SettingsPage() {
       id: "notes" as TabType,
       label: "Notes Categories",
       description: "Manage note categories and colors",
+    },
+    {
+      id: "email" as TabType,
+      label: "Email Settings",
+      description: "Configure SMTP settings for subscription reminders",
     },
   ];
 
@@ -133,6 +139,7 @@ export default function SettingsPage() {
                 description="Manage the categories and colors for organizing your notes."
               />
             )}
+            {activeTab === "email" && <EmailSettings />}
           </div>
         </Card>
       </div>

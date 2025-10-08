@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Badge } from "../../atoms/Badge";
 import { useHandleMenu } from "./useHandleMenu";
+import Image from "next/image";
 
 /**
  * Header component for authenticated users
@@ -117,9 +118,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                 {/* User Avatar */}
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                   {userProfile?.picture ? (
-                    <img
+                    <Image
                       src={userProfile.picture}
                       alt={getUserDisplayName()}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (

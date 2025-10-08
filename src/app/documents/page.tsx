@@ -50,7 +50,7 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedOwner, setSelectedOwner] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode] = useState<ViewMode>("grid");
   const [filter, setFilter] = useState<DocumentFilter>("all");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -113,7 +113,7 @@ export default function DocumentsPage() {
       setDocuments(documentsData.data || []);
       setCategories(categoriesData.data || []);
       setUsers(usersData.data || []);
-    } catch (err) {
+    } catch {
       setError("Failed to load documents");
     } finally {
       setLoading(false);
@@ -126,7 +126,12 @@ export default function DocumentsPage() {
     }
   }, [authLoading, user, loadData]);
 
-  const handleCreateDocument = async (formData: any) => {
+  const handleCreateDocument = async (formData: {
+    name: string;
+    content: string;
+    category: string;
+    file?: File;
+  }) => {
     try {
       setIsSubmitting(true);
 
@@ -168,14 +173,19 @@ export default function DocumentsPage() {
         setEditingDocument(null);
         setSelectedPreDefinedType(null);
       }
-    } catch (err) {
+    } catch {
       setError("Failed to create document");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleUpdateDocument = async (formData: any) => {
+  const handleUpdateDocument = async (formData: {
+    name: string;
+    content: string;
+    category: string;
+    file?: File;
+  }) => {
     if (!editingDocument) return;
 
     try {
@@ -222,7 +232,7 @@ export default function DocumentsPage() {
         setIsDrawerOpen(false);
         setEditingDocument(null);
       }
-    } catch (err) {
+    } catch {
       setError("Failed to update document");
     } finally {
       setIsSubmitting(false);
@@ -246,7 +256,7 @@ export default function DocumentsPage() {
       );
       setDeleteModalOpen(false);
       setDocumentToDelete(null);
-    } catch (err) {
+    } catch {
       setError("Failed to delete document");
     } finally {
       setIsSubmitting(false);

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Camera, Mail, Calendar, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { user, userProfile, loading: authLoading, updateUser } = useAuth();
@@ -182,9 +183,11 @@ export default function ProfilePage() {
               <div className="relative inline-block">
                 <div className="h-32 w-32 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold">
                   {userProfile?.picture ? (
-                    <img
+                    <Image
                       src={userProfile.picture}
                       alt={userProfile.name}
+                      width={128}
+                      height={128}
                       className="h-32 w-32 rounded-full object-cover"
                     />
                   ) : (

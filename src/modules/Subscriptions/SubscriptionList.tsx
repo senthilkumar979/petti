@@ -2,7 +2,8 @@
 
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
 import { CreditCard } from "lucide-react";
-import { useEffect, useState } from "react";
+import React from "react";
+
 import {
   CalendarView,
   GridView,
@@ -25,7 +26,7 @@ interface SubscriptionListProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const SubscriptionList: React.FC<SubscriptionListProps> = ({
+export const SubscriptionList = ({
   subscriptions,
   categories,
   users,
@@ -35,10 +36,10 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({
   onDelete,
   viewMode,
   onViewModeChange,
-}) => {
-  const [isClient, setIsClient] = useState(false);
+}: SubscriptionListProps) => {
+  const [isClient, setIsClient] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsClient(true);
   }, []);
 

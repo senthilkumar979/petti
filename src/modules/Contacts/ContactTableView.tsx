@@ -1,7 +1,7 @@
 "use client";
 
 import { Contact } from "@/types/database";
-import { Edit, Trash2 } from "lucide-react";
+// import { Edit, Trash2 } from "lucide-react";
 import { ContactAction } from "./ContactAction";
 
 interface ContactTableViewProps {
