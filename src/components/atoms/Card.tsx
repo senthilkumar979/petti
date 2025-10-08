@@ -11,9 +11,9 @@ const cardVariants = cva("rounded-lg border bg-white text-black shadow-sm", {
       elevated: "border-gray-200 shadow-md",
     },
     padding: {
-      sm: "p-4",
-      md: "p-6",
-      lg: "p-8",
+      sm: "px-4 py-1",
+      md: "px-6 py-1",
+      lg: "px-8 py-1",
     },
   },
   defaultVariants: {

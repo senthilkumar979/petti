@@ -6,9 +6,9 @@ import { Input } from "@/components/atoms/Input";
 import DeleteModal from "@/components/molecules/DeleteModal";
 import Drawer from "@/components/molecules/Drawer";
 import { Header } from "@/components/organisms/Header/Header";
+import { useAuth } from "@/lib/auth-context";
 import { SubscriptionForm } from "@/modules/Subscriptions/SubscriptionForm";
 import { SubscriptionList } from "@/modules/Subscriptions/SubscriptionList";
-import { useAuth } from "@/lib/auth-context";
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
 import { Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -275,25 +275,24 @@ export default function SubscriptionsPage() {
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search subscriptions..."
-              className="pl-10"
-            />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search subscriptions..."
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 
         {/* Subscriptions List */}
-        <Card className="p-6">
+        <Card className="px-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Your Subscriptions ({filteredSubscriptions.length})
-            </h3>
             {searchQuery && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 py-6">
                 Showing results for &ldquo;{searchQuery}&rdquo;
               </p>
             )}
