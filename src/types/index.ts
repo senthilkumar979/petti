@@ -169,7 +169,7 @@ export interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  description?: string;
+  description?: React.ReactNode;
   children: React.ReactNode;
   side?: "left" | "right" | "top" | "bottom";
 }

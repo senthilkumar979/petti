@@ -9,24 +9,29 @@ import { useCallback, useState } from "react";
 import Drawer from "../../components/molecules/Drawer";
 
 interface NoteFormProps {
-  onSubmit: (
-    data: Omit<
-      NoteInsert,
-      "id" | "lastUpdatedBy" | "lastUpdatedDate" | "createdAt" | "updatedAt"
-    >
-  ) => Promise<void>;
   onCancel: () => void;
-  loading?: boolean;
+  onSuccess: () => void;
   initialData?: Partial<Note>;
   categories: NoteCategory[];
+  createNote: (
+    data: NoteInsert
+  ) => Promise<{ data: Note | null; error: unknown }>;
+  updateNote: (
+    id: string,
+    data: Omit<
+      Note,
+      "id" | "lastUpdatedBy" | "lastUpdatedDate" | "createdAt" | "updatedAt"
+    >
+  ) => Promise<{ data: Note | null; error: unknown }>;
 }
 
 export const NoteForm: React.FC<NoteFormProps> = ({
-  onSubmit,
   onCancel,
-  loading = false,
+  onSuccess,
   initialData,
   categories,
+  createNote,
+  updateNote,
 }) => {
   const [formData, setFormData] = useState({
     heading: initialData?.heading || "",
@@ -35,6 +40,8 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const categoryOptions: SelectOption[] = categories.map((category) => ({
     value: category.id,
@@ -77,18 +84,64 @@ export const NoteForm: React.FC<NoteFormProps> = ({
     }
 
     try {
-      await onSubmit({
+      setLoading(true);
+      setSubmitError(null);
+
+      const noteData = {
         heading: formData.heading.trim(),
         content: formData.content.trim(),
         categoryId: formData.categoryId,
-      });
+      };
+
+      let result;
+      if (initialData?.id) {
+        // Update existing note
+        result = await updateNote(initialData.id, noteData);
+      } else {
+        // Create new note
+        result = await createNote(noteData as NoteInsert);
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      onSuccess();
     } catch (error) {
-      console.error("Error submitting note:", error);
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to save note"
+      );
+    } finally {
+      setLoading(false);
     }
-  }, [formData, validateForm, onSubmit]);
+  }, [formData, validateForm, initialData, createNote, updateNote, onSuccess]);
 
   return (
     <div className="space-y-6">
+      {/* Error Message */}
+      {submitError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800">{submitError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
         {/* Heading */}
         <div>

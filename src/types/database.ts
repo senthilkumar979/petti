@@ -389,6 +389,10 @@ export type Note = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
 export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
 
+export interface NoteWithCategory extends Note {
+  note_categories: NoteCategory;
+}
+
 export type Document = Database["public"]["Tables"]["documents"]["Row"];
 export type DocumentInsert =
   Database["public"]["Tables"]["documents"]["Insert"];

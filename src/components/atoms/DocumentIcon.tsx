@@ -1,5 +1,5 @@
-import React from "react";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 export interface DocumentIconProps {
   type: DocumentType;
@@ -13,14 +13,15 @@ export type DocumentType =
   | "degree-certificate"
   | "birth-certificate"
   | "driving-license"
-  | "work-permit"
+  | "voter-id"
   | "visa"
   | "insurance-card"
   | "medical-certificate"
   | "tax-document"
-  | "bank-statement"
+  | "work-permit"
   | "contract"
   | "invoice"
+  | "bank-statement"
   | "receipt"
   | "other";
 
@@ -135,7 +136,7 @@ export const DocumentIcon: React.FC<DocumentIconProps> = ({
         </svg>
       );
 
-    case "work-permit":
+    case "voter-id":
       return (
         <svg viewBox="0 0 24 24" {...iconProps}>
           <rect
