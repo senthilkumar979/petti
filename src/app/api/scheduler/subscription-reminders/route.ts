@@ -1,7 +1,7 @@
-import { getSMTPService } from "@/lib/smtp";
+import { SMTPService } from "@/lib/smtp";
+import { loadSMTPConfiguration } from "@/lib/smtp-loader";
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
-import { loadSMTPConfiguration } from "@/lib/smtp-loader";
 
 interface Subscription {
   id: string;
@@ -17,42 +17,15 @@ interface Subscription {
   paidFor: string;
   provider?: string;
   note?: string;
+  subscription_categories?: {
+    name: string;
+  };
 }
 
 interface User {
   id: string;
   email: string;
   name: string;
-}
-
-// Helper function to calculate next renewal date based on periodicity
-function calculateNextRenewalDate(
-  currentDate: string,
-  periodicity: string
-): string {
-  const date = new Date(currentDate);
-
-  switch (periodicity) {
-    case "Monthly":
-      date.setMonth(date.getMonth() + 1);
-      break;
-    case "Quarterly":
-      date.setMonth(date.getMonth() + 3);
-      break;
-    case "Half-yearly":
-      date.setMonth(date.getMonth() + 6);
-      break;
-    case "Annual":
-      date.setFullYear(date.getFullYear() + 1);
-      break;
-    case "Bi-annual":
-      date.setFullYear(date.getFullYear() + 2);
-      break;
-    default:
-      throw new Error(`Unknown periodicity: ${periodicity}`);
-  }
-
-  return date.toISOString().split("T")[0];
 }
 
 // Helper function to parse reminder days
@@ -92,7 +65,11 @@ function shouldSendReminder(
 }
 
 // Email template for subscription reminders
-function createEmailTemplate(subscription: Subscription, user: User): string {
+function createEmailTemplate(
+  subscription: Subscription,
+  user: User,
+  categoryMap: Map<string, string>
+): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -132,7 +109,7 @@ function createEmailTemplate(subscription: Subscription, user: User): string {
               subscription.periodicity
             }</li>
             <li style="margin: 8px 0;"><strong>Category:</strong> ${
-              subscription.category
+              categoryMap.get(subscription.category) || subscription.category
             }</li>
             ${
               subscription.provider
@@ -167,7 +144,13 @@ async function processSubscriptionReminders() {
   console.log("🚀 STARTING REMINDER PROCESSING");
   try {
     // Load SMTP configuration
-    await loadSMTPConfiguration();
+    console.log("🔄 Loading SMTP configuration...");
+    const smtpConfig = await loadSMTPConfiguration();
+    if (!smtpConfig) {
+      console.error("❌ No SMTP configuration found");
+      return;
+    }
+    console.log("✅ SMTP configuration loaded:", smtpConfig.provider);
 
     const supabaseClient = supabase;
 
@@ -189,6 +172,24 @@ async function processSubscriptionReminders() {
     const { data: users, error: usersError } = await supabaseClient
       .from("users")
       .select("id, email, name");
+
+    // Get all subscription categories for name lookup
+    const { data: categories, error: categoriesError } = await supabaseClient
+      .from("subscription-categories")
+      .select("id, name");
+
+    if (categoriesError) {
+      console.error("Error fetching categories:", categoriesError);
+      return;
+    }
+
+    // Create category name lookup
+    const categoryMap = new Map();
+    if (categories) {
+      categories.forEach((cat) => {
+        categoryMap.set(cat.id, cat.name);
+      });
+    }
 
     if (usersError) {
       console.error("Error fetching users:", usersError);
@@ -264,7 +265,8 @@ async function processSubscriptionReminders() {
       try {
         const emailHtml = createEmailTemplate(
           reminder.subscription,
-          reminder.user
+          reminder.user,
+          categoryMap
         );
 
         // Get other users for CC (excluding the paidFor user)
@@ -272,17 +274,13 @@ async function processSubscriptionReminders() {
           .filter((user) => user.id !== reminder.subscription.paidFor)
           .map((user) => user.email);
 
-        // Get SMTP service
-        const smtpService = getSMTPService();
+        // Create SMTP service with loaded configuration
+        const smtpService = new SMTPService(smtpConfig);
 
-        if (!smtpService) {
-          console.error(
-            "No SMTP configuration found. Please configure SMTP settings in the admin panel."
-          );
-          continue;
-        }
+        console.log("📧 Sending email to:", reminder.user.email);
 
         // Send email using SMTP
+        console.log("📤 Attempting to send email...");
         const emailResult = await smtpService.sendEmail({
           to: reminder.user.email,
           cc: ccUsers,
@@ -290,14 +288,16 @@ async function processSubscriptionReminders() {
           html: emailHtml,
         });
 
+        console.log("📧 Email result:", emailResult);
+
         if (!emailResult.success) {
           console.error(
-            `Error sending email for subscription ${reminder.subscription.id}:`,
+            `❌ Error sending email for subscription ${reminder.subscription.id}:`,
             emailResult.error
           );
         } else {
           console.log(
-            `Reminder email sent successfully for subscription ${reminder.subscription.id} (${reminder.reminderType})`
+            `✅ Reminder email sent successfully for subscription ${reminder.subscription.id} (${reminder.reminderType})`
           );
         }
       } catch (error) {
@@ -308,7 +308,17 @@ async function processSubscriptionReminders() {
       }
     }
 
-    console.log(`Processed ${remindersToSend.length} subscription reminders`);
+    console.log(
+      `📊 Processed ${remindersToSend.length} subscription reminders`
+    );
+    console.log(
+      "📋 Reminders to send:",
+      remindersToSend.map((r) => ({
+        subscription: r.subscription.nameOfSubscription,
+        user: r.user.email,
+        type: r.reminderType,
+      }))
+    );
   } catch (error) {
     console.error("Error in processSubscriptionReminders:", error);
   }

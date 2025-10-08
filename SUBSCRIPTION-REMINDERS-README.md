@@ -54,22 +54,36 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ### 1. Install Dependencies
 
 ```bash
-npm install resend node-cron @types/node-cron
+npm install nodemailer @types/nodemailer
 ```
 
-### 2. Configure Environment Variables
+### 2. Configure SMTP Settings
 
-Add the following to your `.env.local` file:
+Configure your SMTP settings in the application's Email Settings page:
 
-```env
-RESEND_API_KEY=your_resend_api_key
-```
+1. **Go to Settings → Email Settings**
+2. **Select your email provider** (Gmail, Outlook, Zoho, or Custom)
+3. **Enter your SMTP credentials**
+4. **Test the configuration**
+5. **Save the settings**
 
-### 3. Get Resend API Key
+### 3. SMTP Provider Setup
 
-1. Sign up at [resend.com](https://resend.com)
-2. Create a new API key in your dashboard
-3. Add the API key to your environment variables
+**For Gmail:**
+
+1. Enable 2-Factor Authentication
+2. Generate an App Password
+3. Use the App Password in SMTP settings
+
+**For Outlook:**
+
+1. Use your regular email credentials
+2. SMTP: smtp-mail.outlook.com, Port: 587
+
+**For Zoho:**
+
+1. Use your regular email credentials
+2. SMTP: smtp.zoho.com, Port: 587
 
 ### 4. Deploy and Test
 
