@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 // Helper function to parse reminder days
@@ -37,7 +37,7 @@ function shouldSendReminder(
   );
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log("🧪 Testing Reminder Logic");
 

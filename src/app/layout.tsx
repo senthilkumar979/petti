@@ -1,4 +1,5 @@
 import { Providers } from "@/lib/providers";
+import { Toaster } from "@/components/atoms/Toaster";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import React from "react";
@@ -26,7 +27,10 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning={true}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

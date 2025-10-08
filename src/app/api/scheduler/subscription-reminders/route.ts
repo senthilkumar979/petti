@@ -328,6 +328,19 @@ async function processSubscriptionReminders() {
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if SMTP is configured before processing
+    const smtpConfig = await loadSMTPConfiguration();
+    if (!smtpConfig) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "SMTP configuration not found",
+          message: "Please configure SMTP settings in the Email Settings page before sending reminders.",
+        },
+        { status: 400 }
+      );
+    }
+
     // Manual trigger for testing
     const { searchParams } = new URL(request.url);
     const manual = searchParams.get("manual");
@@ -357,6 +370,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST() {
   try {
+    // Check if SMTP is configured before processing
+    const smtpConfig = await loadSMTPConfiguration();
+    if (!smtpConfig) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "SMTP configuration not found",
+          message: "Please configure SMTP settings in the Email Settings page before sending reminders.",
+        },
+        { status: 400 }
+      );
+    }
+
     await processSubscriptionReminders();
     return NextResponse.json({
       success: true,

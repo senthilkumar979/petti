@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card } from "@/components/atoms/Card";
 import { Button } from "@/components/atoms/Button";
+import { Card } from "@/components/atoms/Card";
 import { Input } from "@/components/atoms/Input";
 import { Select } from "@/components/atoms/Select";
+import { useToast } from "@/hooks/useToast";
 import { EMAIL_PROVIDERS, SMTPConfig } from "@/types/smtp";
+import { useEffect, useState } from "react";
 
 interface SMTPConfigurationProps {
   onConfigChange?: (config: SMTPConfig | null) => void;
@@ -14,6 +15,7 @@ interface SMTPConfigurationProps {
 export default function SMTPConfiguration({
   onConfigChange,
 }: SMTPConfigurationProps) {
+  const { toast } = useToast();
   const [config, setConfig] = useState<Partial<SMTPConfig>>({
     provider: "gmail",
     host: "smtp.gmail.com",
@@ -29,12 +31,14 @@ export default function SMTPConfiguration({
   const [testEmail, setTestEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [testResult, setTestResult] = useState<any>(null);
   const [message, setMessage] = useState("");
 
   // Load existing configuration
   useEffect(() => {
     loadConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadConfig = async () => {
@@ -58,7 +62,7 @@ export default function SMTPConfiguration({
     if (selectedProvider) {
       setConfig((prev) => ({
         ...prev,
-        provider: provider as any,
+        provider: provider as SMTPConfig["provider"],
         host: selectedProvider.host,
         port: selectedProvider.port,
         secure: selectedProvider.secure,
@@ -67,6 +71,16 @@ export default function SMTPConfiguration({
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!config.host || !config.port || !config.username || !config.password || !config.fromEmail) {
+      toast({
+        title: "❌ Missing Required Fields",
+        description: "Please fill in all required fields (Host, Port, Username, Password, From Email)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setMessage("");
 
@@ -82,14 +96,26 @@ export default function SMTPConfiguration({
       const data = await response.json();
 
       if (data.success) {
-        setMessage("✅ SMTP configuration saved successfully!");
+        toast({
+          title: "✅ Success",
+          description: "SMTP configuration saved successfully!",
+          variant: "success",
+        });
         setConfig(data.config);
         onConfigChange?.(data.config);
       } else {
-        setMessage(`❌ Error: ${data.error}`);
+        toast({
+          title: "❌ Error",
+          description: data.error || "Failed to save configuration",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      setMessage("❌ Failed to save configuration");
+    } catch {
+      toast({
+        title: "❌ Error",
+        description: "Failed to save configuration",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +123,21 @@ export default function SMTPConfiguration({
 
   const handleTest = async () => {
     if (!testEmail) {
-      setMessage("❌ Please enter a test email address");
+      toast({
+        title: "❌ Missing Test Email",
+        description: "Please enter a test email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if SMTP configuration is complete
+    if (!config.host || !config.port || !config.username || !config.password || !config.fromEmail) {
+      toast({
+        title: "❌ Incomplete Configuration",
+        description: "Please complete all SMTP configuration fields before testing",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -121,12 +161,24 @@ export default function SMTPConfiguration({
       setTestResult(data);
 
       if (data.success) {
-        setMessage("✅ Test email sent successfully! Check your inbox.");
+        toast({
+          title: "✅ Test Email Sent",
+          description: "Test email sent successfully! Check your inbox.",
+          variant: "success",
+        });
       } else {
-        setMessage(`❌ Test failed: ${data.message}`);
+        toast({
+          title: "❌ Test Failed",
+          description: data.error || data.message || "Unknown error",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      setMessage("❌ Failed to send test email");
+    } catch {
+      toast({
+        title: "❌ Test Failed",
+        description: "Failed to send test email. Please check your configuration.",
+        variant: "destructive",
+      });
     } finally {
       setIsTesting(false);
     }
@@ -160,12 +212,12 @@ export default function SMTPConfiguration({
           fromEmail: "",
           isActive: false,
         };
-        setConfig(defaultConfig);
+        setConfig(defaultConfig as Partial<SMTPConfig>);
         onConfigChange?.(null);
       } else {
         setMessage(`❌ Error: ${data.error}`);
       }
-    } catch (error) {
+    } catch {
       setMessage("❌ Failed to delete configuration");
     } finally {
       setIsLoading(false);

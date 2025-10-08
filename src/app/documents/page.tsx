@@ -128,9 +128,11 @@ export default function DocumentsPage() {
 
   const handleCreateDocument = async (formData: {
     name: string;
-    content: string;
     category: string;
-    file?: File;
+    owner: string;
+    validity: string | null;
+    file: File | null;
+    isPreDefined: boolean;
   }) => {
     try {
       setIsSubmitting(true);
@@ -143,7 +145,7 @@ export default function DocumentsPage() {
         const reader = new FileReader();
         content = await new Promise((resolve) => {
           reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(formData.file);
+          reader.readAsDataURL(formData.file!);
         });
         mimeType = formData.file.type;
       }
@@ -152,7 +154,7 @@ export default function DocumentsPage() {
         name: formData.name,
         category: formData.category,
         owner: formData.owner,
-        validity: formData.validity || null,
+        validity: formData.validity,
         mimeType,
         content,
         isPreDefined: formData.isPreDefined,
@@ -182,9 +184,11 @@ export default function DocumentsPage() {
 
   const handleUpdateDocument = async (formData: {
     name: string;
-    content: string;
     category: string;
-    file?: File;
+    owner: string;
+    validity: string | null;
+    file: File | null;
+    isPreDefined: boolean;
   }) => {
     if (!editingDocument) return;
 
@@ -199,7 +203,7 @@ export default function DocumentsPage() {
         const reader = new FileReader();
         content = await new Promise((resolve) => {
           reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(formData.file);
+          reader.readAsDataURL(formData.file!);
         });
         mimeType = formData.file.type;
       }
@@ -208,7 +212,7 @@ export default function DocumentsPage() {
         name: formData.name,
         category: formData.category,
         owner: formData.owner,
-        validity: formData.validity || null,
+        validity: formData.validity,
         mimeType,
         content,
         isPreDefined: formData.isPreDefined,
@@ -635,11 +639,17 @@ export default function DocumentsPage() {
           setDeleteModalOpen(false);
           setDocumentToDelete(null);
         }}
-        onConfirm={handleDeleteDocument}
         title="Delete Document"
         description={`Are you sure you want to delete "${documentToDelete?.name}"? This action cannot be undone.`}
-        isLoading={isSubmitting}
-      />
+      >
+        <DeleteModal.Action
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setDocumentToDelete(null);
+          }}
+          onConfirm={handleDeleteDocument}
+        />
+      </DeleteModal>
     </div>
   );
 }

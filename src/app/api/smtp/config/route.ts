@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { SMTPConfig } from "@/types/smtp";
-import { setGlobalSMTP, getSMTPService } from "@/lib/smtp";
+import { setGlobalSMTP } from "@/lib/smtp";
 
 // Get SMTP configuration
 export async function GET() {
