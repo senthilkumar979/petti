@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "../components/atoms/Card";
 import { Header } from "../components/organisms/Header/Header";
+import Dashboard from "../components/organisms/Dashboard";
 
 export default function HomePage() {
   const { fetchAllUsers, loading: authLoading, user } = useAuth();
@@ -113,56 +114,11 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-2">
-            Welcome to your Petti admin dashboard
+            Welcome to your Petti statistics dashboard
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Total Users
-            </h3>
-            <p className="text-3xl font-bold text-blue-600">0</p>
-            <p className="text-sm text-gray-500 mt-1">Registered users</p>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Active Sessions
-            </h3>
-            <p className="text-3xl font-bold text-green-600">1</p>
-            <p className="text-sm text-gray-500 mt-1">Currently online</p>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              System Status
-            </h3>
-            <p className="text-3xl font-bold text-green-600">✓</p>
-            <p className="text-sm text-gray-500 mt-1">
-              All systems operational
-            </p>
-          </Card>
-        </div>
-
-        <div className="mt-8">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="flex flex-wrap gap-4">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                Manage Users
-              </button>
-              <button className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-                View Reports
-              </button>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                Add New User
-              </button>
-            </div>
-          </Card>
-        </div>
+        <Dashboard />
       </div>
     </div>
   );
