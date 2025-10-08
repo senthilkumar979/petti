@@ -62,7 +62,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <img
+          <Image
             src="/logo.png"
             alt="Petti"
             width="150"
