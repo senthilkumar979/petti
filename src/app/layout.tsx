@@ -1,5 +1,5 @@
-import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/atoms/Toaster";
+import { Providers } from "@/lib/providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import React from "react";
@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Petti - Modern NextJS Application",
+  title: "Petti - Comprehensive Personal Subscription Management Platform",
   description:
-    "A modern NextJS application with TypeScript, Tailwind CSS, and Radix UI",
+    "Streamline personal subscription management with integrated document handling, notes, contacts.",
 };
 
 export default function RootLayout({
