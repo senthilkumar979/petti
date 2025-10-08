@@ -2,10 +2,10 @@
 
 import { DropdownMenu } from "@/components/molecules/DropdownMenu";
 import { useAuth } from "@/lib/auth-context";
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "../../atoms/Badge";
 import { useHandleMenu } from "./useHandleMenu";
-import Image from "next/image";
 
 /**
  * Header component for authenticated users
@@ -56,7 +56,8 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       <div className="flex items-center justify-between h-16">
         {/* App Name - Left Side */}
         <div className="flex items-center">
-          <h1 className="text-xl font-bold text-gray-900">PETTI</h1>
+          <Image src="/logo.png" alt="Petti" width="50" height="50" />
+          <h1 className="ml-4 text-xl font-bold text-gray-900">PETTI</h1>
           <Badge variant="warning" size="xs" className="ml-4">
             v0.1.0-beta
           </Badge>

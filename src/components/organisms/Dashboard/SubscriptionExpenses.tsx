@@ -1,8 +1,9 @@
 "use client";
 
-import { Card } from "@/components/atoms/Card";
 import { Button } from "@/components/atoms/Button";
+import { Card } from "@/components/atoms/Card";
 import { TrendingUp } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface SubscriptionExpense {
@@ -46,6 +47,13 @@ export default function SubscriptionExpenses({
       <div className="space-y-3">
         {subscriptionExpenses.length === 0 ? (
           <p className="text-gray-500 text-center py-4">
+            <Image
+              src="/logo.png"
+              alt="Petti"
+              width="50"
+              height="50"
+              className="mb-5"
+            />
             No subscription expenses
           </p>
         ) : (
