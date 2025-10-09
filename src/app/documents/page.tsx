@@ -406,7 +406,7 @@ export default function DocumentsPage() {
               </Button>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-center items-center">
               <div className="flex space-x-2">
                 <Button
                   variant={filter === "all" ? "primary" : "outline"}

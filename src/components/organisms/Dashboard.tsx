@@ -83,62 +83,22 @@ export default function Dashboard() {
       // Log warnings for optional tables but don't fail
       const missingTables = [];
       if (contactsResult.error) {
-        console.warn(
-          "Contacts table not accessible:",
-          contactsResult.error instanceof Error
-            ? contactsResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("contacts");
       }
       if (notesResult.error) {
-        console.warn(
-          "Notes table not accessible:",
-          notesResult.error instanceof Error
-            ? notesResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("notes");
       }
       if (documentsResult.error) {
-        console.warn(
-          "Documents table not accessible:",
-          documentsResult.error instanceof Error
-            ? documentsResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("documents");
       }
       if (subscriptionCategoriesResult.error) {
-        console.warn(
-          "Subscription categories not accessible:",
-          subscriptionCategoriesResult.error instanceof Error
-            ? subscriptionCategoriesResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("subscription-categories");
       }
       if (documentCategoriesResult.error) {
-        console.warn(
-          "Document categories not accessible:",
-          documentCategoriesResult.error instanceof Error
-            ? documentCategoriesResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("document-categories");
       }
       if (noteCategoriesResult.error) {
-        console.warn(
-          "Note categories not accessible:",
-          noteCategoriesResult.error instanceof Error
-            ? noteCategoriesResult.error.message
-            : "Unknown error"
-        );
         missingTables.push("note-categories");
-      }
-
-      if (missingTables?.length > 0) {
-        console.info("Missing tables detected:", missingTables.join(", "));
       }
 
       const users = usersResult.data || [];
@@ -271,8 +231,6 @@ export default function Dashboard() {
       };
     });
   };
-
-  console.log(currenciesUsed());
 
   useEffect(() => {
     if (!authLoading && user) {

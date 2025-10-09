@@ -3,9 +3,9 @@
 import { DropdownMenu } from "@/components/molecules/DropdownMenu";
 import { useAuth } from "@/lib/auth-context";
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Badge } from "../../atoms/Badge";
+import { HeaderMenu } from "./HeaderMenu";
 import { useHandleMenu } from "./useHandleMenu";
 
 /**
@@ -55,26 +55,6 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     setIsMobileMenuOpen(false);
   };
 
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    if (isMobileMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMobileMenuOpen]);
-
   // Don't render if user is not authenticated
   if (!user) return null;
 
@@ -98,41 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
 
         {/* Desktop Navigation Links - Hidden on mobile */}
         <nav className="hidden lg:flex items-center space-x-8">
-          <Link
-            className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            href="/"
-            onClick={closeMobileMenu}
-          >
-            Home
-          </Link>
-          <Link
-            className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            href="/subscriptions"
-            onClick={closeMobileMenu}
-          >
-            Subscriptions
-          </Link>
-          <Link
-            className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            href="/documents"
-            onClick={closeMobileMenu}
-          >
-            Documents
-          </Link>
-          <Link
-            className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            href="/contacts"
-            onClick={closeMobileMenu}
-          >
-            Contacts
-          </Link>
-          <Link
-            className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            href="/notes"
-            onClick={closeMobileMenu}
-          >
-            Notes
-          </Link>
+          <HeaderMenu closeMobileMenu={closeMobileMenu} />
         </nav>
 
         {/* Right Side - User Info and Mobile Menu Button */}
@@ -148,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
           {/* Mobile Menu Button */}
           {isMobileMenuOpen ? (
             <button
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
               className="lg:hidden p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Toggle mobile menu"
             >
@@ -244,42 +190,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               </span>
             </div>
 
-            {/* Mobile Navigation Links */}
-            <Link
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              href="/"
-              onClick={closeMobileMenu}
-            >
-              Home
-            </Link>
-            <Link
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              href="/subscriptions"
-              onClick={closeMobileMenu}
-            >
-              Subscriptions
-            </Link>
-            <Link
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              href="/documents"
-              onClick={closeMobileMenu}
-            >
-              Documents
-            </Link>
-            <Link
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              href="/contacts"
-              onClick={closeMobileMenu}
-            >
-              Contacts
-            </Link>
-            <Link
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              href="/notes"
-              onClick={closeMobileMenu}
-            >
-              Notes
-            </Link>
+            <HeaderMenu closeMobileMenu={closeMobileMenu} />
           </div>
         </div>
       )}

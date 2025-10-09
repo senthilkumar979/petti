@@ -1,8 +1,48 @@
 "use client";
 
 import { Card } from "@/components/atoms/Card";
-import { Calendar, CreditCard, FileText, Users } from "lucide-react";
+import {
+  CreditCard,
+  File,
+  FileText,
+  User,
+  User2,
+  UserCheck2Icon,
+  Users,
+  UserSquare2,
+  UsersRound,
+  UserStar,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { StatsOverviewProps } from "./types";
+
+const StatCard = ({
+  icon,
+  bgColor,
+  title,
+  count,
+  handleClick,
+}: {
+  icon: React.ReactNode;
+  bgColor: string;
+  textColor: string;
+  title: string;
+  count: number;
+  handleClick: () => void;
+}) => (
+  <Card
+    className="py-4 px-3 flex items-center cursor-pointer"
+    onClick={handleClick}
+  >
+    <div className="p-2 rounded-lg" style={{ backgroundColor: bgColor }}>
+      {icon}
+    </div>
+    <div className="ml-2 lg:ml-4">
+      <p className="text-sm font-medium text-gray-600">{title}</p>
+      <p className="text-2xl font-bold text-gray-900">{count}</p>
+    </div>
+  </Card>
+);
 
 export default function StatsOverview({
   totalUsers,
@@ -11,69 +51,58 @@ export default function StatsOverview({
   totalNotes,
   totalDocuments,
 }: StatsOverviewProps) {
+  const router = useRouter();
+
+  const handleClick = (page: string) => {
+    router.push(`/${page.toLowerCase()}`);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-      <Card className="p-6">
-        <div className="flex items-center">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Users className="h-6 w-6 text-blue-600" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600"> Users</p>
-            <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
-          </div>
-        </div>
-      </Card>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <StatCard
+        icon={<UserStar className="h-6 w-6 text-blue-600" />}
+        bgColor="bg-blue-100"
+        textColor="text-blue-600"
+        title="Users"
+        count={totalUsers}
+        handleClick={() => handleClick("settings")}
+      />
 
-      <Card className="p-6">
-        <div className="flex items-center">
-          <div className="p-2 bg-green-100 rounded-lg">
-            <CreditCard className="h-6 w-6 text-green-600" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Subscriptions</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {totalSubscriptions}
-            </p>
-          </div>
-        </div>
-      </Card>
+      <StatCard
+        icon={<CreditCard className="h-6 w-6 text-green-600" />}
+        bgColor="bg-green-100"
+        textColor="text-green-600"
+        title="Subscriptions"
+        count={totalSubscriptions}
+        handleClick={() => handleClick("subscriptions")}
+      />
 
-      <Card className="p-6">
-        <div className="flex items-center">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Users className="h-6 w-6 text-purple-600" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Contacts</p>
-            <p className="text-2xl font-bold text-gray-900">{totalContacts}</p>
-          </div>
-        </div>
-      </Card>
+      <StatCard
+        icon={<File className="h-6 w-6 text-indigo-600" />}
+        bgColor="bg-indigo-100"
+        textColor="text-indigo-600"
+        title="Documents"
+        count={totalDocuments}
+        handleClick={() => handleClick("documents")}
+      />
 
-      <Card className="p-6">
-        <div className="flex items-center">
-          <div className="p-2 bg-yellow-100 rounded-lg">
-            <FileText className="h-6 w-6 text-yellow-600" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Notes</p>
-            <p className="text-2xl font-bold text-gray-900">{totalNotes}</p>
-          </div>
-        </div>
-      </Card>
+      <StatCard
+        icon={<Users className="h-6 w-6 text-purple-600" />}
+        bgColor="bg-purple-100"
+        textColor="text-purple-600"
+        title="Contacts"
+        count={totalContacts}
+        handleClick={() => handleClick("contacts")}
+      />
 
-      <Card className="p-6">
-        <div className="flex items-center">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <Calendar className="h-6 w-6 text-indigo-600" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Documents</p>
-            <p className="text-2xl font-bold text-gray-900">{totalDocuments}</p>
-          </div>
-        </div>
-      </Card>
+      <StatCard
+        icon={<FileText className="h-6 w-6 text-yellow-600" />}
+        bgColor="bg-yellow-100"
+        textColor="text-yellow-600"
+        title="Notes"
+        count={totalNotes}
+        handleClick={() => handleClick("notes")}
+      />
     </div>
   );
 }
