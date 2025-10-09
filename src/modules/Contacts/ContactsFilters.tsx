@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/atoms/Input";
-import { Grid3X3, List, Search, Table2, Users } from "lucide-react";
+import { Grid3X3, List, Search, Table2 } from "lucide-react";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 type ViewMode = "list" | "grid" | "table";

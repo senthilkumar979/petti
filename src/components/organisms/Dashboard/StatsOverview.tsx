@@ -1,18 +1,7 @@
 "use client";
 
 import { Card } from "@/components/atoms/Card";
-import {
-  CreditCard,
-  File,
-  FileText,
-  User,
-  User2,
-  UserCheck2Icon,
-  Users,
-  UserSquare2,
-  UsersRound,
-  UserStar,
-} from "lucide-react";
+import { CreditCard, File, FileText, Users, UserStar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { StatsOverviewProps } from "./types";
 

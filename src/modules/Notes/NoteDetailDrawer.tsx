@@ -80,10 +80,7 @@ export const NoteDetailDrawer = ({
               </div>
               {isMobile && getCategory()}
             </div>
-            <EditDeleteActions
-              onEdit={() => onEdit(selectedNote)}
-              onDelete={() => onDelete(selectedNote)}
-            />
+            <EditDeleteActions onEdit={handleEdit} onDelete={handleDelete} />
           </div>
 
           {/* Note Content */}
