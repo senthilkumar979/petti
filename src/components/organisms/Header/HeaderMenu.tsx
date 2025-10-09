@@ -13,7 +13,7 @@ export const HeaderMenu = ({
   closeMobileMenu: () => void;
 }) => {
   return (
-    <div>
+    <>
       <HeaderLink
         label="Home"
         href="/"
@@ -44,6 +44,6 @@ export const HeaderMenu = ({
         onClick={closeMobileMenu}
         icon={<FileTextIcon className="w-4 h-4" />}
       />
-    </div>
+    </>
   );
 };

@@ -9,9 +9,6 @@ import {
   formatRenewalDate,
   getCategoryName,
   getPeriodicityColor,
-  getRenewalStatus,
-  getStatusColor,
-  getStatusIcon,
   getUserName,
 } from "./util";
 
@@ -54,18 +51,12 @@ export const TableView: React.FC<TableViewProps> = ({
               Provider
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-gray-200 min-w-full">
           {subscriptions.map((subscription) => {
-            const renewalStatus = getRenewalStatus(subscription.renewalDate);
-            const statusColor = getStatusColor(renewalStatus);
-
             return (
               <tr key={subscription.id} className="hover:bg-gray-50 m-4">
                 <td className="px-6 py-6 whitespace-nowrap">
@@ -115,18 +106,6 @@ export const TableView: React.FC<TableViewProps> = ({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {subscription.provider || "-"}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    {getStatusIcon(renewalStatus)}
-                    <Badge variant={statusColor} size="small" className="ml-2">
-                      {renewalStatus === "renewed"
-                        ? "Renewed"
-                        : renewalStatus === "renewing-soon"
-                        ? "Renewing Soon"
-                        : "Active"}
-                    </Badge>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

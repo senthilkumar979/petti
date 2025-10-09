@@ -5,7 +5,7 @@ import { Card } from "@/components/atoms/Card";
 import { EditDeleteActions } from "@/components/templates/EditDeleteActions";
 import { formatCurrency } from "@/lib/utils";
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
-import { CreditCard } from "lucide-react";
+import { CalendarCheck2, CreditCard } from "lucide-react";
 import {
   formatRenewalDate,
   getCategoryName,
@@ -33,7 +33,7 @@ export const GridView: React.FC<GridViewProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
       {subscriptions.map((subscription) => {
         const renewalStatus = getRenewalStatus(subscription.renewalDate);
         const statusColor = getStatusColor(renewalStatus);
@@ -103,45 +103,43 @@ export const GridView: React.FC<GridViewProps> = ({
                   {getUserName(users, subscription.paidFor)}
                 </span>
               </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500">Provider</span>
+                <span className="text-sm text-gray-900">
+                  {subscription.provider}
+                </span>
+              </div>
 
-              {subscription.provider && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Provider</span>
-                  <span className="text-sm text-gray-900">
-                    {subscription.provider}
-                  </span>
-                </div>
-              )}
-
-              {subscription.note && (
-                <div className="flex items-start justify-between">
-                  <span className="text-sm text-gray-500">Note</span>
-                  <span className="text-sm text-gray-900 text-right max-w-32 truncate">
-                    {subscription.note}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-start justify-between">
+                <span className="text-sm text-gray-500">Note</span>
+                <span className="text-sm text-gray-900 text-right max-w-32 truncate">
+                  {subscription.note}
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2 mb-4">
               <div className="text-xs text-gray-500">Reminders</div>
-              <div className="flex flex-wrap gap-1">
+              <div className="grid grid-cols-2 gap-4">
                 <Badge
                   variant={getReminderColor(subscription.reminderOne)}
                   size="small"
                 >
+                  <CalendarCheck2 className="h-4 w-4 text-green-500" />
                   {subscription.reminderOne}
                 </Badge>
                 <Badge
                   variant={getReminderColor(subscription.reminderTwo)}
                   size="small"
                 >
+                  <CalendarCheck2 className="h-4 w-4 text-green-500" />
                   {subscription.reminderTwo}
                 </Badge>
                 <Badge
                   variant={getReminderColor(subscription.reminderThree)}
                   size="small"
                 >
+                  <CalendarCheck2 className="h-4 w-4 text-green-500" />
                   {subscription.reminderThree}
                 </Badge>
               </div>

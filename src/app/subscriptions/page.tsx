@@ -40,9 +40,6 @@ export default function SubscriptionsPage() {
   const [subscriptionToDelete, setSubscriptionToDelete] =
     useState<Subscription | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewMode, setViewMode] = useState<
-    "list" | "table" | "grid" | "calendar"
-  >("calendar");
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -306,8 +303,6 @@ export default function SubscriptionsPage() {
             error={error || undefined}
             onEdit={handleEditSubscription}
             onDelete={handleDeleteSubscription}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
           />
         </Card>
 

@@ -2,8 +2,9 @@
 
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
 import { CreditCard } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import {
   CalendarView,
   GridView,
@@ -11,8 +12,6 @@ import {
   TableView,
   ViewModeSelector,
 } from "./components";
-
-type ViewMode = "list" | "table" | "grid" | "calendar";
 
 interface SubscriptionListProps {
   subscriptions: Subscription[];
@@ -22,8 +21,6 @@ interface SubscriptionListProps {
   error?: string;
   onEdit: (subscription: Subscription) => void;
   onDelete: (subscription: Subscription) => void;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
 }
 
 export const SubscriptionList = ({
@@ -34,14 +31,21 @@ export const SubscriptionList = ({
   error,
   onEdit,
   onDelete,
-  viewMode,
-  onViewModeChange,
 }: SubscriptionListProps) => {
-  const [isClient, setIsClient] = React.useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const { isMobile } = useMediaQuery();
+  const [viewMode, setViewMode] = useState<
+    "list" | "table" | "grid" | "calendar"
+  >();
 
   React.useEffect(() => {
     setIsClient(true);
-  }, []);
+    if (isMobile) {
+      setViewMode("grid");
+    } else {
+      setViewMode("calendar");
+    }
+  }, [isMobile]);
 
   // Loading state
   if (loading) {
@@ -134,8 +138,8 @@ export const SubscriptionList = ({
           </h3>
         </div>
         <ViewModeSelector
-          currentView={viewMode}
-          onViewChange={onViewModeChange}
+          currentView={viewMode || "grid"}
+          onViewChange={setViewMode}
         />
       </div>
 

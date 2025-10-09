@@ -40,6 +40,7 @@ export interface BadgeProps {
   variant: string;
   className?: string;
   children: React.ReactNode;
+  isBlock?: boolean;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -47,6 +48,7 @@ export const Badge: React.FC<BadgeProps> = ({
   variant,
   className,
   children,
+  isBlock = false,
 }) => {
   const sizeClasses = {
     xs: "px-1 py-0.5 text-xs",
@@ -90,7 +92,8 @@ export const Badge: React.FC<BadgeProps> = ({
     foreground: "bg-foreground-50 text-foreground-900",
   };
 
-  const baseClasses = "inline-flex items-center font-medium rounded-lg";
+  const baseClasses =
+    "items-center font-medium rounded-lg w-fit gap-2 flex"
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const combinedClasses = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className}`;
