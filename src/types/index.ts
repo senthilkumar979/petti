@@ -272,3 +272,10 @@ export type Variant =
   | "destructive";
 export type Position = "top" | "bottom" | "left" | "right";
 export type Alignment = "start" | "center" | "end";
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}

@@ -15,10 +15,10 @@ export const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({
   currentView,
   onViewChange,
 }) => {
-  const { isMobile } = useMediaQuery();
+  const { isMobile, isTablet } = useMediaQuery();
   return (
     <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-lg">
-      {!isMobile && (
+      {!isMobile && !isTablet && (
         <Button
           variant={currentView === "calendar" ? "primary" : "ghost"}
           size="sm"
@@ -47,7 +47,7 @@ export const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({
       >
         List
       </Button>
-      {!isMobile && (
+      {!isMobile && !isTablet && (
         <Button
           variant={currentView === "table" ? "primary" : "ghost"}
           size="sm"

@@ -28,7 +28,13 @@ export const ContactTableView = ({
               Name
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Contact
+              Designation
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Phone
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Company
@@ -60,12 +66,12 @@ export const ContactTableView = ({
                     <div className="text-sm font-medium text-gray-900">
                       {contact.name}
                     </div>
-                    {contact.designation && (
-                      <div className="text-sm text-gray-500">
-                        {contact.designation}
-                      </div>
-                    )}
                   </div>
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                  {contact.designation || "-"}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -73,6 +79,11 @@ export const ContactTableView = ({
                   {contact.primaryEmail ||
                     contact.primaryPhone ||
                     "No contact info"}
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                  {contact.primaryPhone || "-"}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

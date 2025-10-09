@@ -4,6 +4,7 @@ import { Card } from "@/components/atoms/Card";
 import DeleteModal from "@/components/molecules/DeleteModal";
 import Drawer from "@/components/molecules/Drawer";
 import { Header } from "@/components/organisms/Header/Header";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuth } from "@/lib/auth-context";
 import { ContactDetails } from "@/modules/Contacts/ContactDetails";
 import { ContactForm } from "@/modules/Contacts/ContactForm";
@@ -35,13 +36,20 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isMobile, isTablet } = useMediaQuery();
+
+  useEffect(() => {
+    if (isMobile || isTablet) {
+      setViewMode("list");
+    }
+  }, [isMobile, isTablet]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -276,7 +284,7 @@ export default function ContactsPage() {
           )}
 
           {/* Table View */}
-          {viewMode === "table" && filteredContacts.length > 0 && (
+          {!isMobile && viewMode === "table" && filteredContacts.length > 0 && (
             <ContactTableView
               contacts={filteredContacts}
               onViewContact={handleViewContact}

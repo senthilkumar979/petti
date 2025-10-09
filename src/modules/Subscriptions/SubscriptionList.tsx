@@ -33,19 +33,19 @@ export const SubscriptionList = ({
   onDelete,
 }: SubscriptionListProps) => {
   const [isClient, setIsClient] = useState(false);
-  const { isMobile } = useMediaQuery();
+  const { isMobile, isTablet } = useMediaQuery();
   const [viewMode, setViewMode] = useState<
     "list" | "table" | "grid" | "calendar"
   >();
 
   React.useEffect(() => {
     setIsClient(true);
-    if (isMobile) {
+    if (isMobile || isTablet) {
       setViewMode("grid");
     } else {
       setViewMode("calendar");
     }
-  }, [isMobile]);
+  }, [isMobile, isTablet]);
 
   // Loading state
   if (loading) {

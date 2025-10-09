@@ -8,8 +8,8 @@ export const useMediaQuery = () => {
 
   useEffect(() => {
     setIsMobile(createMediaQuery("(max-width: 768px)"));
-    setIsTablet(createMediaQuery("(max-width: 1024px)"));
-    setIsDesktop(createMediaQuery("(max-width: 1280px)"));
+    setIsTablet(createMediaQuery("(min-width: 769px) and (max-width: 1024px)"));
+    setIsDesktop(createMediaQuery("(min-width: 1025px)"));
   }, []);
 
   return { isMobile, isTablet, isDesktop };

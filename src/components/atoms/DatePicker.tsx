@@ -220,7 +220,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     return (
       <div className="w-full" ref={containerRef}>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
           </label>
         )}
@@ -228,7 +228,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           <div
             onClick={() => !disabled && setIsOpen(!isOpen)}
             className={cn(
-              "flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer transition-all duration-200 hover:border-gray-400",
+              "flex h-10 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer transition-all duration-200 hover:border-gray-400",
               error && "border-red-500 focus-visible:ring-red-500",
               isOpen && "ring-2 ring-blue-500 border-blue-500",
               className

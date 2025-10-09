@@ -45,15 +45,10 @@ export const ContactDetails: React.FC<ContactDetailsProps> = ({
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{contact.name}</h2>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="mt-3">
             <Badge variant={getCategoryColor(contact.category)} size="small">
               {contact.category === "work" ? "Work" : "Personal"}
             </Badge>
-            {contact.designation && (
-              <span className="text-sm text-gray-600">
-                {contact.designation}
-              </span>
-            )}
           </div>
         </div>
         {(onEdit || onDelete) && (

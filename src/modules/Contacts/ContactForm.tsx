@@ -1,11 +1,12 @@
 "use client";
 
+import { DatePicker } from "@/components/atoms/DatePicker";
 import { Input } from "@/components/atoms/Input";
 import { Select } from "@/components/atoms/Select";
-import { DatePicker } from "@/components/atoms/DatePicker";
 import { SelectOption } from "@/types";
 import { Contact, ContactInsert } from "@/types/database";
 import { useCallback, useState } from "react";
+import { Textarea } from "../../components/atoms/Textarea";
 import Drawer from "../../components/molecules/Drawer";
 
 interface ContactFormProps {
@@ -124,18 +125,18 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
   return (
     <div className="space-y-6">
+      <div className="">
+        <Input
+          label="Full Name"
+          value={formData.name}
+          onChange={(e) => handleInputChange("name", e.target.value)}
+          placeholder="Enter full name"
+          error={errors.name}
+          required
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Name */}
-        <div className="md:col-span-2">
-          <Input
-            label="Full Name"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            placeholder="Enter full name"
-            error={errors.name}
-            required
-          />
-        </div>
 
         {/* Primary Email */}
         <div>
@@ -255,17 +256,17 @@ export const ContactForm: React.FC<ContactFormProps> = ({
             error={errors.referrer}
           />
         </div>
+      </div>
 
-        {/* Notes */}
-        <div className="md:col-span-2">
-          <Input
-            label="Notes"
-            value={formData.notes}
-            onChange={(e) => handleInputChange("notes", e.target.value)}
-            placeholder="Add any additional notes about this contact"
-            error={errors.notes}
-          />
-        </div>
+      {/* Notes */}
+      <div className="">
+        <Textarea
+          label="Notes"
+          value={formData.notes}
+          onChange={(e) => handleInputChange("notes", e.target.value)}
+          placeholder="Add any additional notes about this contact"
+          error={errors.notes}
+        />
       </div>
 
       <Drawer.Action
