@@ -52,16 +52,28 @@ function shouldSendReminder(
   reminderDays: number
 ): boolean {
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day
+  
   const renewal = new Date(renewalDate);
+  renewal.setHours(0, 0, 0, 0); // Normalize to start of day
+  
   const reminderDate = new Date(renewal);
   reminderDate.setDate(reminderDate.getDate() - reminderDays);
 
+  console.log(`    Today: ${today.toDateString()}`);
+  console.log(`    Renewal: ${renewal.toDateString()}`);
+  console.log(`    Reminder Date: ${reminderDate.toDateString()}`);
+  console.log(`    Days before: ${reminderDays}`);
+
   // Check if today matches the reminder date (within same day)
-  return (
+  const shouldSend = (
     today.getFullYear() === reminderDate.getFullYear() &&
     today.getMonth() === reminderDate.getMonth() &&
     today.getDate() === reminderDate.getDate()
   );
+  
+  console.log(`    Should send: ${shouldSend}`);
+  return shouldSend;
 }
 
 // Email template for subscription reminders

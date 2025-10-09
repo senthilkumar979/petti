@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/atoms/Input";
 import { Select } from "@/components/atoms/Select";
+import { DatePicker } from "@/components/atoms/DatePicker";
 import { SelectOption } from "@/types";
 import { Contact, ContactInsert } from "@/types/database";
 import { useCallback, useState } from "react";
@@ -235,11 +236,11 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
         {/* Last Contacted */}
         <div>
-          <Input
+          <DatePicker
             label="Last Contacted"
-            type="date"
             value={formData.lastContacted}
-            onChange={(e) => handleInputChange("lastContacted", e.target.value)}
+            onChange={(date) => handleInputChange("lastContacted", date)}
+            placeholder="Select last contacted date"
             error={errors.lastContacted}
           />
         </div>
