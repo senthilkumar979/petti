@@ -1,13 +1,15 @@
 "use client";
 
 import { NoteWithCategory } from "@/types/database";
-import { Edit, Trash2 } from "lucide-react";
+import { Calendar, User } from "lucide-react";
+import { EditDeleteActions } from "../../components/templates/EditDeleteActions";
 
 interface NoteGridViewProps {
   notes: NoteWithCategory[];
   onViewNote: (note: NoteWithCategory) => void;
   onEditNote: (note: NoteWithCategory) => void;
   onDeleteNote: (note: NoteWithCategory) => void;
+  getUserName: (userId: string) => string;
   formatDate: (dateString: string) => string;
   stripHtml: (html: string) => string;
 }
@@ -16,6 +18,7 @@ export const NoteGridView = ({
   notes,
   onViewNote,
   onEditNote,
+  getUserName,
   onDeleteNote,
   formatDate,
   stripHtml,
@@ -28,7 +31,7 @@ export const NoteGridView = ({
           className="p-6 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           onClick={() => onViewNote(note)}
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <span
               className="px-2 py-1 text-xs rounded-full"
               style={{
@@ -38,36 +41,25 @@ export const NoteGridView = ({
             >
               {note.note_categories?.name}
             </span>
+            <EditDeleteActions
+              onEdit={() => onEditNote(note)}
+              onDelete={() => onDeleteNote(note)}
+            />
           </div>
           <h4 className="text-lg font-semibold text-gray-900 mb-2">
             {note.heading}
           </h4>
-          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3 border-t pt-4">
             {stripHtml(note.content)}
           </p>
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{formatDate(note.lastUpdatedDate)}</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditNote(note);
-                }}
-                className="p-1 text-gray-400 hover:text-blue-600"
-                title="Edit note"
-              >
-                <Edit className="h-3 w-3" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteNote(note);
-                }}
-                className="p-1 text-gray-400 hover:text-red-600"
-                title="Delete note"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>Updated {formatDate(note.lastUpdatedDate)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <User className="h-3 w-3" />
+              <span>By {getUserName(note.lastUpdatedBy)}</span>
             </div>
           </div>
         </div>

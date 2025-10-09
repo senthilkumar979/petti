@@ -309,6 +309,7 @@ export default function NotesPage() {
               notes={paginatedNotes}
               onViewNote={handleViewNote}
               onEditNote={handleEditNote}
+              getUserName={(userId) => getUserName(userId, users)}
               onDeleteNote={handleDeleteNote}
               formatDate={formatDate}
               stripHtml={stripHtml}

@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/atoms/Input";
 import { NoteCategory } from "@/types/database";
-import { FileText, Search } from "lucide-react";
+import { FileText, Grid2X2, Search } from "lucide-react";
 
 type ViewMode = "list" | "grid";
 
@@ -60,7 +60,7 @@ export const NotesFilters = ({
       </div>
 
       {/* View Mode Selector */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2">
         <button
           onClick={() => onViewModeChange("list")}
           className={`p-2 rounded-lg transition-colors ${
@@ -79,12 +79,7 @@ export const NotesFilters = ({
               : "text-gray-400 hover:text-gray-600"
           }`}
         >
-          <div className="grid grid-cols-2 gap-0.5 h-4 w-4">
-            <div className="bg-current rounded-sm"></div>
-            <div className="bg-current rounded-sm"></div>
-            <div className="bg-current rounded-sm"></div>
-            <div className="bg-current rounded-sm"></div>
-          </div>
+          <Grid2X2 className="h-4 w-4" />
         </button>
       </div>
     </div>

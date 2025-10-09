@@ -84,6 +84,7 @@ module.exports = {
     "px-5",
     "py-5",
     "p-5",
+    "flex-row-reverse",
   ],
   theme: {
     extend: {

@@ -1,7 +1,9 @@
 "use client";
 
 import { NoteWithCategory } from "@/types/database";
-import { Calendar, Edit, Trash2, User } from "lucide-react";
+import { Calendar, User } from "lucide-react";
+import { EditDeleteActions } from "../../components/templates/EditDeleteActions";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 interface NoteListViewProps {
   notes: NoteWithCategory[];
@@ -22,6 +24,7 @@ export const NoteListView = ({
   formatDate,
   stripHtml,
 }: NoteListViewProps) => {
+  const { isMobile } = useMediaQuery();
   return (
     <div className="space-y-4">
       {notes.map((note) => (
@@ -31,8 +34,8 @@ export const NoteListView = ({
           onClick={() => onViewNote(note)}
         >
           <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+            <div className="flex-1 gap-4">
+              <div className="flex sm:flex-row flex-col items-center gap-3 mb-2">
                 <h4 className="text-lg font-semibold text-gray-900">
                   {note.heading}
                 </h4>
@@ -46,7 +49,7 @@ export const NoteListView = ({
                   {note.note_categories?.name}
                 </span>
               </div>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2 ">
                 {stripHtml(note.content)}
               </p>
               <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -59,29 +62,23 @@ export const NoteListView = ({
                   <span>By {getUserName(note.lastUpdatedBy)}</span>
                 </div>
               </div>
+              {isMobile && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <EditDeleteActions
+                    onEdit={() => onEditNote(note)}
+                    onDelete={() => onDeleteNote(note)}
+                  />
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 ml-4">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditNote(note);
-                }}
-                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="Edit note"
-              >
-                <Edit className="h-4 w-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteNote(note);
-                }}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Delete note"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
+            {!isMobile && (
+              <div className="flexitems-center gap-2">
+                <EditDeleteActions
+                  onEdit={() => onEditNote(note)}
+                  onDelete={() => onDeleteNote(note)}
+                />
+              </div>
+            )}
           </div>
         </div>
       ))}

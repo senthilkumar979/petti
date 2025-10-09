@@ -8,12 +8,20 @@ export const EditDeleteActions = ({
   onEdit: () => void;
   onDelete: () => void;
 }) => {
+  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onEdit();
+  };
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onDelete();
+  };
   return (
     <div className="flex items-center gap-2">
-      <Button onClick={onEdit} variant="outline" size="md">
+      <Button onClick={handleEdit} variant="outline" size="md">
         <Pencil className="h-4 w-4" />
       </Button>
-      <Button onClick={onDelete} variant="destructive" size="md">
+      <Button onClick={handleDelete} variant="destructive" size="md">
         <Trash className="h-4 w-4" />
       </Button>
     </div>
