@@ -5,6 +5,7 @@ import { DocumentIcon } from "@/components/atoms/DocumentIcon";
 import { Document } from "@/types/database";
 import { CheckCircle, Edit, Grid, Table, Trash2, Upload } from "lucide-react";
 import { PREDEFINED_DOCUMENT_TYPES } from "../../app/data/PredefinedDocs";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 interface PreDefinedDocumentsListProps {
   documents: Document[];
@@ -25,6 +26,7 @@ export const PreDefinedDocumentsList: React.FC<
   onEditDocument,
   onDeleteDocument,
 }) => {
+  const { isMobile } = useMediaQuery();
   return (
     <div className="p-6">
       <div className="flex justify-between items-start mb-4">
@@ -36,24 +38,26 @@ export const PreDefinedDocumentsList: React.FC<
             Common document types that you can upload and manage
           </p>
         </div>
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="outline"
-            onClick={() => onViewStyleChange("grid")}
-            className={viewStyle === "grid" ? "bg-gray-200" : ""}
-            leftIcon={<Grid className="h-4 w-4" />}
-          >
-            Grid
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => onViewStyleChange("table")}
-            className={viewStyle === "table" ? "bg-gray-200" : ""}
-            leftIcon={<Table className="h-4 w-4" />}
-          >
-            Table
-          </Button>
-        </div>
+        {!isMobile && (
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              onClick={() => onViewStyleChange("grid")}
+              className={viewStyle === "grid" ? "bg-gray-200" : ""}
+              leftIcon={<Grid className="h-4 w-4" />}
+            >
+              Grid
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => onViewStyleChange("table")}
+              className={viewStyle === "table" ? "bg-gray-200" : ""}
+              leftIcon={<Table className="h-4 w-4" />}
+            >
+              Table
+            </Button>
+          </div>
+        )}
       </div>
 
       {viewStyle === "grid" ? (
