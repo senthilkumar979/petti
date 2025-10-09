@@ -4,13 +4,13 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "../../components/atoms/Card";
+import Drawer from "../../components/molecules/Drawer";
+import { UserInviteForm } from "../../components/molecules/UserInviteForm";
+import { UsersList } from "../../components/molecules/UsersList";
+import EmailSettings from "../../components/organisms/EmailSettings";
 import { Header } from "../../components/organisms/Header/Header";
 import { CategoriesTab } from "../../components/templates/CategoriesTab";
-import { UsersList } from "../../components/molecules/UsersList";
-import { UserInviteForm } from "../../components/molecules/UserInviteForm";
-import Drawer from "../../components/molecules/Drawer";
 import { useUsers } from "../../hooks/useUsers";
-import EmailSettings from "../../components/organisms/EmailSettings";
 
 type TabType = "users" | "subscription" | "document" | "notes" | "email";
 
@@ -92,12 +92,12 @@ export default function SettingsPage() {
         <Card className="p-6">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200 mb-6">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex space-x-8 md:space-x-8 md:flex-row flex-col">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={`py-2 px-1 md:border-b-2 lg:border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"

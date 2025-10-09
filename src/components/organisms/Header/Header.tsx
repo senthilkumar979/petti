@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         <div className="flex items-center">
           <Image src="/logo.png" alt="Petti" width="50" height="50" />
           <h1 className="ml-4 text-xl font-bold text-gray-900">PETTI</h1>
-          <div className="block sm:hidden">
+          <div className="">
             <Badge variant="warning" size="xs" className="ml-4">
               v1.0.0-beta
             </Badge>

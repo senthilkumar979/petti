@@ -203,7 +203,7 @@ export const CategoriesTab = ({
           leftIcon={<Plus className="h-4 w-4" />}
           className="shrink-0"
         >
-          Add Category
+          Add
         </Button>
       </div>
 
@@ -246,7 +246,7 @@ export const CategoriesTab = ({
             <Input
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
-              placeholder="Enter category name"
+              placeholder="Enter category"
               className="flex-1"
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
@@ -265,7 +265,9 @@ export const CategoriesTab = ({
               leftIcon={isAdding ? undefined : <Check className="h-4 w-4" />}
               loading={isAdding}
             >
-              {isAdding ? "Adding..." : "Add"}
+              <span className="hidden md:inline">
+                {isAdding ? "Adding..." : "Add"}
+              </span>
             </Button>
             <Button
               onClick={() => {
@@ -275,7 +277,7 @@ export const CategoriesTab = ({
               variant="secondary"
               leftIcon={<X className="h-4 w-4" />}
             >
-              Cancel
+              <span className="hidden md:inline">Cancel</span>
             </Button>
           </div>
         </Card>
