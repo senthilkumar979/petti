@@ -2,14 +2,10 @@
 
 import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
-import { Note } from "@/types/database";
 import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { stripHtml } from "../../../modules/Notes/noteUtils";
-
-interface RecentNotesProps {
-  recentNotes: Note[];
-}
+import { RecentNotesProps } from "./types";
 
 export default function RecentNotes({ recentNotes }: RecentNotesProps) {
   const router = useRouter();

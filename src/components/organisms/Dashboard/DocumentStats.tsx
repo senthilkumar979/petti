@@ -4,15 +4,7 @@ import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
 import { PieChart } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface DocumentStat {
-  category: string;
-  count: number;
-}
-
-interface DocumentStatsProps {
-  documentStats: DocumentStat[];
-}
+import { DocumentStatsProps } from "./types";
 
 export default function DocumentStats({ documentStats }: DocumentStatsProps) {
   const router = useRouter();

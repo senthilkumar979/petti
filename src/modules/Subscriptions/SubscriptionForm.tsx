@@ -1,8 +1,8 @@
 "use client";
 
+import { DatePicker } from "@/components/atoms/DatePicker";
 import { Input } from "@/components/atoms/Input";
 import { Select } from "@/components/atoms/Select";
-import { DatePicker } from "@/components/atoms/DatePicker";
 import { SelectOption } from "@/types";
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
 import { useCallback, useState } from "react";
@@ -195,7 +195,6 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             onChange={(date) => handleInputChange("renewalDate", date)}
             placeholder="Select renewal date"
             error={errors.renewalDate}
-            required
           />
         </div>
 

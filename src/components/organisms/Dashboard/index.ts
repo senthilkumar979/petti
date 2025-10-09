@@ -4,3 +4,6 @@ export { default as RecentContacts } from "./RecentContacts";
 export { default as RecentNotes } from "./RecentNotes";
 export { default as SubscriptionExpenses } from "./SubscriptionExpenses";
 export { default as DocumentStats } from "./DocumentStats";
+
+// Export types
+export * from "./types";

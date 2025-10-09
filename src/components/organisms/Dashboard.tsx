@@ -4,12 +4,14 @@ import { Card } from "@/components/atoms/Card";
 import { useAuth } from "@/lib/auth-context";
 import { Contact, Note, Subscription } from "@/types/database";
 import { useCallback, useEffect, useState } from "react";
-import StatsOverview from "./Dashboard/StatsOverview";
-import UpcomingSubscriptions from "./Dashboard/UpcomingSubscriptions";
+import DocumentStats from "./Dashboard/DocumentStats";
 import RecentContacts from "./Dashboard/RecentContacts";
 import RecentNotes from "./Dashboard/RecentNotes";
+import StatsOverview from "./Dashboard/StatsOverview";
 import SubscriptionExpenses from "./Dashboard/SubscriptionExpenses";
-import DocumentStats from "./Dashboard/DocumentStats";
+import { SubscriptionExpense } from "./Dashboard/types";
+import UpcomingSubscriptions from "./Dashboard/UpcomingSubscriptions";
+import { expensesByCurrency } from "./Dashboard/utils";
 
 interface DashboardStats {
   totalUsers: number;
@@ -23,6 +25,7 @@ interface DashboardStats {
   subscriptionExpenses: Array<{
     category: string;
     amount: number;
+    currency: string;
     count: number;
   }>;
   documentStats: Array<{ category: string; count: number }>;
@@ -171,7 +174,7 @@ export default function Dashboard() {
             new Date(b.renewalDate).getTime()
         );
 
-      // Calculate subscription expenses by category
+      // Calculate subscription expenses by category and currency
       const subscriptionExpenses =
         subscriptionCategories.length > 0
           ? subscriptionCategories
@@ -179,16 +182,32 @@ export default function Dashboard() {
                 const categorySubscriptions = subscriptions.filter(
                   (sub) => sub.category === category.id
                 );
-                const totalAmount = categorySubscriptions.reduce(
-                  (sum, sub) => sum + sub.amount,
-                  0
+
+                // Group by currency to avoid mixing different currencies
+                const expensesByCurrency = categorySubscriptions.reduce(
+                  (acc, sub) => {
+                    const currency = sub.currency || "USD";
+                    if (!acc[currency]) {
+                      acc[currency] = { amount: 0, count: 0 };
+                    }
+                    acc[currency].amount += sub.amount;
+                    acc[currency].count += 1;
+                    return acc;
+                  },
+                  {} as Record<string, { amount: number; count: number }>
                 );
-                return {
-                  category: category.name,
-                  amount: totalAmount,
-                  count: categorySubscriptions.length,
-                };
+
+                // Return expenses grouped by currency
+                return Object.entries(expensesByCurrency).map(
+                  ([currency, data]) => ({
+                    category: category.name,
+                    amount: data.amount,
+                    currency: currency,
+                    count: data.count,
+                  })
+                );
               })
+              .flat()
               .filter((expense) => expense.count > 0)
           : [];
 
@@ -238,6 +257,22 @@ export default function Dashboard() {
     fetchDocumentCategories,
     fetchNoteCategories,
   ]);
+
+  const currenciesUsed = () => {
+    return Object.entries(
+      expensesByCurrency(stats?.subscriptionExpenses || [])
+    ).map(([currency, currencyExpenses]) => {
+      return {
+        currency,
+        amount: currencyExpenses.reduce(
+          (sum: number, expense: SubscriptionExpense) => sum + expense.amount,
+          0
+        ),
+      };
+    });
+  };
+
+  console.log(currenciesUsed());
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -349,16 +384,29 @@ export default function Dashboard() {
         <RecentContacts recentContacts={stats.recentContacts} />
       </div>
 
-      {/* Recent Notes */}
-      <RecentNotes recentNotes={stats.recentNotes} />
+      {currenciesUsed().length > 1 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Notes */}
+          <RecentNotes recentNotes={stats.recentNotes} />
+          <DocumentStats documentStats={stats.documentStats} />
+        </div>
+      )}
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {currenciesUsed().length > 1 && (
         <SubscriptionExpenses
           subscriptionExpenses={stats.subscriptionExpenses}
         />
-        <DocumentStats documentStats={stats.documentStats} />
-      </div>
+      )}
+
+      {/* Charts Section */}
+      {currenciesUsed().length <= 1 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SubscriptionExpenses
+            subscriptionExpenses={stats.subscriptionExpenses}
+          />
+          <DocumentStats documentStats={stats.documentStats} />
+        </div>
+      )}
     </div>
   );
 }

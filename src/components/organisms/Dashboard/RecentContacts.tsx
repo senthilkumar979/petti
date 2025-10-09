@@ -2,13 +2,9 @@
 
 import { Card } from "@/components/atoms/Card";
 import { Button } from "@/components/atoms/Button";
-import { Contact } from "@/types/database";
 import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface RecentContactsProps {
-  recentContacts: Contact[];
-}
+import { RecentContactsProps } from "./types";
 
 export default function RecentContacts({
   recentContacts,

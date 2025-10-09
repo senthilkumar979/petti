@@ -2,13 +2,9 @@
 
 import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
-import { Subscription } from "@/types/database";
 import { Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface UpcomingSubscriptionsProps {
-  upcomingSubscriptions: Subscription[];
-}
+import { UpcomingSubscriptionsProps } from "./types";
 
 export default function UpcomingSubscriptions({
   upcomingSubscriptions,

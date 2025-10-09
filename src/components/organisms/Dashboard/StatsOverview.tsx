@@ -1,15 +1,8 @@
 "use client";
 
 import { Card } from "@/components/atoms/Card";
-import { Users, CreditCard, FileText, Calendar } from "lucide-react";
-
-interface StatsOverviewProps {
-  totalUsers: number;
-  totalSubscriptions: number;
-  totalContacts: number;
-  totalNotes: number;
-  totalDocuments: number;
-}
+import { Calendar, CreditCard, FileText, Users } from "lucide-react";
+import { StatsOverviewProps } from "./types";
 
 export default function StatsOverview({
   totalUsers,
@@ -26,7 +19,7 @@ export default function StatsOverview({
             <Users className="h-6 w-6 text-blue-600" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Total Users</p>
+            <p className="text-sm font-medium text-gray-600"> Users</p>
             <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
           </div>
         </div>
