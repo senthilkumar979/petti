@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
           <h1 className="ml-4 text-xl font-bold text-gray-900">PETTI</h1>
           <div className="block sm:hidden">
             <Badge variant="warning" size="xs" className="ml-4">
-              v0.1.0-beta
+              v1.0.0-beta
             </Badge>
           </div>
         </div>
