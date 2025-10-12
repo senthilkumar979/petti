@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description:
     "Streamline personal subscription management with integrated document handling, notes, contacts.",
   manifest: "/manifest.json",
-  themeColor: "#667eea",
+  themeColor: "#166534",
   viewport:
     "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
