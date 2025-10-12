@@ -144,10 +144,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
+  console.log("🔍 useAuth: Hook called");
   const context = useContext(AuthContext);
   if (context === undefined) {
+    console.error("❌ useAuth: No context found - not within AuthProvider");
     throw new Error("useAuth must be used within an AuthProvider");
   }
+  console.log("✅ useAuth: Context found", {
+    user: !!context.user,
+    loading: context.loading,
+  });
   return context;
 };
 
@@ -156,6 +162,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  console.log("🚀 AuthProvider: Initializing authentication context");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -190,9 +197,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log("🔍 Getting initial session...");
         const {
           data: { session },
         } = await supabase.auth.getSession();
+        console.log("🔍 Initial session:", {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id?.substring(0, 10),
+        });
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchUserProfile(session.user.id);
@@ -209,14 +222,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     }, 10000); // 10 second timeout
 
-    getInitialSession();
-
-    return () => clearTimeout(timeoutId);
-
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("🔄 Auth State Change:", {
+        event,
+        user: !!session?.user,
+        sessionId: session?.access_token?.substring(0, 10),
+      });
       setUser(session?.user ?? null);
       if (session?.user) {
         try {
@@ -229,6 +243,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       setLoading(false);
     });
+
+    // Get initial session
+    getInitialSession();
 
     return () => {
       clearTimeout(timeoutId);
@@ -307,13 +324,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("🔐 Attempting sign in for:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log("🔐 Sign in result:", {
+        success: !error,
+        user: !!data?.user,
+        session: !!data?.session,
+        error: error?.message,
+      });
+
       return { error };
     } catch (error) {
+      console.log("🔐 Sign in error:", error);
       return { error };
     }
   };

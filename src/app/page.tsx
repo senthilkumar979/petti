@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { registerServiceWorker } from "@/lib/pwa";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "../components/atoms/Card";
 import Dashboard from "../components/organisms/Dashboard";
@@ -13,13 +14,26 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Register service worker for PWA functionality
+    registerServiceWorker();
+
     const loadUsers = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        console.log("🔍 Auth Debug:", {
+          authLoading,
+          user: !!user,
+          showLogin,
+          pathname,
+          currentRoute: pathname,
+        });
 
         const { data, error: fetchError } = await fetchAllUsers();
 
@@ -34,16 +48,20 @@ export default function HomePage() {
 
         // If no users exist, show admin setup
         if (!data || data.length === 0) {
+          console.log("📝 No users found, redirecting to setup");
           router.push("/setup");
           setShowLogin(false);
         } else {
           // If users exist but no one is logged in, show login
           if (!user) {
+            console.log("👤 No user logged in, showing login");
             setShowLogin(true);
           } else {
-            // User is logged in, show users list
+            // User is logged in, show dashboard
+            console.log("✅ User logged in, showing dashboard");
             setShowLogin(false);
-            router.push("/");
+            setHasRedirected(false); // Reset redirect flag
+            // No need to redirect since we're already on the homepage
           }
         }
       } catch {
@@ -53,10 +71,11 @@ export default function HomePage() {
       }
     };
 
+    // Only load users if authentication is not loading
     if (!authLoading) {
       loadUsers();
     }
-  }, [fetchAllUsers, router, authLoading, user]);
+  }, [fetchAllUsers, router, authLoading, user, pathname, showLogin]);
 
   if (authLoading || loading) {
     return (
@@ -77,7 +96,13 @@ export default function HomePage() {
   }
 
   if (showLogin) {
-    router.push("/login");
+    // Only redirect if we're not already on the login page and haven't redirected yet
+    if (pathname !== "/login" && !hasRedirected) {
+      console.log("🔄 Redirecting to login page");
+      setHasRedirected(true);
+      router.push("/login");
+    }
+    return null; // Prevent rendering the rest of the component
   }
 
   if (error) {

@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-icons": "node scripts/generate-pwa-icons.js",
+    "create-favicon": "node scripts/create-favicon.js",
+    "update-manifest": "node scripts/update-manifest.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

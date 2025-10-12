@@ -18,10 +18,18 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("🔍 Login Debug:", { user: !!user, isLoading });
+
     if (user) {
-      router.push("/");
+      // Add a small delay to ensure auth state is fully updated
+      const timer = setTimeout(() => {
+        console.log("🔄 Login: User authenticated, redirecting to homepage");
+        router.push("/");
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
-  }, [user, router]);
+  }, [user, router, isLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,6 +44,8 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
+    console.log("🔐 Login: Form submitted", { email: formData.email });
+
     // Validation
     if (!formData.email.trim()) {
       setError("Email is required");
@@ -48,6 +58,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    console.log("🔐 Login: Calling signIn function");
 
     try {
       const { error: signInError } = await signIn(

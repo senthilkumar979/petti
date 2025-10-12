@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Icon Generator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f0f0;
+        }
+        .icon-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px;
+        }
+        .icon-item { 
+            text-align: center; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .icon-item img { 
+            border: 1px solid #ddd; 
+            border-radius: 4px;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .download-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 PWA Icon Generator</h1>
+    
+    <div class="instructions">
+        <h3>📋 Instructions:</h3>
+        <ol>
+            <li>Right-click on each icon below</li>
+            <li>Select "Save image as..."</li>
+            <li>Save with the filename shown below each icon</li>
+            <li>Place all saved icons in the <code>public/</code> directory</li>
+        </ol>
+    </div>
+
+    <div class="icon-grid">
+        
+            <div class="icon-item">
+                <h4>icon-72.png</h4>
+                <img id="icon-72" width="72" height="72" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(72, 'icon-72.png')">
+                    Download icon-72.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-96.png</h4>
+                <img id="icon-96" width="96" height="96" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(96, 'icon-96.png')">
+                    Download icon-96.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-128.png</h4>
+                <img id="icon-128" width="128" height="128" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(128, 'icon-128.png')">
+                    Download icon-128.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-144.png</h4>
+                <img id="icon-144" width="144" height="144" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(144, 'icon-144.png')">
+                    Download icon-144.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-152.png</h4>
+                <img id="icon-152" width="152" height="152" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(152, 'icon-152.png')">
+                    Download icon-152.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-180.png</h4>
+                <img id="icon-180" width="180" height="180" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(180, 'icon-180.png')">
+                    Download icon-180.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-192.png</h4>
+                <img id="icon-192" width="192" height="192" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(192, 'icon-192.png')">
+                    Download icon-192.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-384.png</h4>
+                <img id="icon-384" width="384" height="384" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(384, 'icon-384.png')">
+                    Download icon-384.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>icon-512.png</h4>
+                <img id="icon-512" width="512" height="512" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadIcon(512, 'icon-512.png')">
+                    Download icon-512.png
+                </button>
+            </div>
+        
+        
+        
+            <div class="icon-item">
+                <h4>apple-touch-icon-120x120.png</h4>
+                <img id="apple-icon-120" width="120" height="120" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadAppleIcon(120, 'apple-touch-icon-120x120.png')">
+                    Download apple-touch-icon-120x120.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>apple-touch-icon-152x152.png</h4>
+                <img id="apple-icon-152" width="152" height="152" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadAppleIcon(152, 'apple-touch-icon-152x152.png')">
+                    Download apple-touch-icon-152x152.png
+                </button>
+            </div>
+        
+            <div class="icon-item">
+                <h4>apple-touch-icon-180x180.png</h4>
+                <img id="apple-icon-180" width="180" height="180" style="background: white;">
+                <br>
+                <button class="download-btn" onclick="downloadAppleIcon(180, 'apple-touch-icon-180x180.png')">
+                    Download apple-touch-icon-180x180.png
+                </button>
+            </div>
+        
+    </div>
+
+    <script>
+        // Load the logo
+        const logo = new Image();
+        logo.crossOrigin = "anonymous";
+        logo.onload = function() {
+            // Generate all icons
+            iconSizes.forEach(icon => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = icon.size;
+                canvas.height = icon.size;
+                
+                // Draw logo scaled to icon size
+                ctx.drawImage(logo, 0, 0, icon.size, icon.size);
+                
+                // Convert to data URL and set as image source
+                const img = document.getElementById(`icon-${icon.size}`);
+                img.src = canvas.toDataURL('image/png');
+            });
+            
+            // Generate Apple touch icons
+            appleIconSizes.forEach(icon => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = icon.size;
+                canvas.height = icon.size;
+                
+                // Draw logo scaled to icon size
+                ctx.drawImage(logo, 0, 0, icon.size, icon.size);
+                
+                // Convert to data URL and set as image source
+                const img = document.getElementById(`apple-icon-${icon.size}`);
+                img.src = canvas.toDataURL('image/png');
+            });
+        };
+        logo.src = './logo.png';
+        
+        function downloadIcon(size, filename) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            ctx.drawImage(logo, 0, 0, size, size);
+            
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadAppleIcon(size, filename) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            ctx.drawImage(logo, 0, 0, size, size);
+            
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
