@@ -32,7 +32,7 @@ export const PWAInstallPrompt = () => {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isInStandaloneMode =
         "standalone" in window.navigator &&
-        (window.navigator as any).standalone;
+        (window.navigator as unknown as { standalone: boolean }).standalone;
 
       if (isIOS && isInStandaloneMode) {
         setIsInstalled(true);

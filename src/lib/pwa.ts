@@ -26,7 +26,7 @@ export const isPWA = (): boolean => {
   // Check if running in iOS Safari standalone mode
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isInStandaloneMode =
-    "standalone" in window.navigator && (window.navigator as any).standalone;
+    "standalone" in window.navigator && (window.navigator as unknown as { standalone: boolean }).standalone;
 
   return isIOS && isInStandaloneMode;
 };
