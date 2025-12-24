@@ -87,11 +87,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
       newErrors.renewalDate = "Renewal date is required";
     }
 
-    if (!formData.endDate) {
-      newErrors.endDate = "End date is required";
-    }
-
-    if (formData.renewalDate && formData.endDate) {
+    if (formData.endDate && formData.renewalDate) {
       const renewal = new Date(formData.renewalDate);
       const end = new Date(formData.endDate);
       if (end <= renewal) {
@@ -123,7 +119,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         amount: Number(formData.amount),
         currency: formData.currency,
         renewalDate: formData.renewalDate,
-        endDate: formData.endDate,
+        endDate: formData.endDate || null,
         reminderOne: formData.reminderOne as Subscription["reminderOne"],
         reminderTwo: formData.reminderTwo as Subscription["reminderTwo"],
         reminderThree: formData.reminderThree as Subscription["reminderThree"],

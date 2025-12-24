@@ -158,27 +158,39 @@ export interface Database {
       reminders: {
         Row: {
           id: string;
-          subscriptionId: string;
-          reminderDate: string;
-          reminderType: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
-          createdAt: string;
-          updatedAt: string;
+          subscription_id: string;
+          reminder_date: string;
+          reminder_type:
+            | "reminderOne"
+            | "reminderTwo"
+            | "reminderThree"
+            | "renewal";
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
-          subscriptionId: string;
-          reminderDate: string;
-          reminderType: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
-          createdAt?: string;
-          updatedAt?: string;
+          subscription_id: string;
+          reminder_date: string;
+          reminder_type:
+            | "reminderOne"
+            | "reminderTwo"
+            | "reminderThree"
+            | "renewal";
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
-          subscriptionId?: string;
-          reminderDate?: string;
-          reminderType?: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
-          createdAt?: string;
-          updatedAt?: string;
+          subscription_id?: string;
+          reminder_date?: string;
+          reminder_type?:
+            | "reminderOne"
+            | "reminderTwo"
+            | "reminderThree"
+            | "renewal";
+          created_at?: string;
+          updated_at?: string;
         };
       };
       "subscription-categories": {

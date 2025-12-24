@@ -524,42 +524,117 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Generate and insert reminder entries if endDate is provided
-      if (data && subscriptionData.endDate) {
-        const { generateReminderDates } = await import(
-          "@/modules/Subscriptions/reminderUtils"
-        );
+      const hasValidEndDate =
+        subscriptionData.endDate && subscriptionData.endDate.trim() !== "";
 
-        const reminderDates = generateReminderDates(
-          subscriptionData.renewalDate,
-          subscriptionData.endDate,
-          subscriptionData.periodicity,
-          subscriptionData.reminderOne,
-          subscriptionData.reminderTwo,
-          subscriptionData.reminderThree
-        );
+      console.log("🔍 Checking if reminders should be created...", {
+        hasData: !!data,
+        hasEndDate: !!subscriptionData.endDate,
+        hasValidEndDate,
+        endDate: subscriptionData.endDate,
+        subscriptionId: data?.id,
+      });
 
-        if (reminderDates.length > 0) {
-          const reminderInserts = reminderDates.map((reminder) => ({
-            subscriptionId: data.id,
-            reminderDate: reminder.date,
-            reminderType: reminder.reminderType,
-            createdAt: now,
-            updatedAt: now,
-          }));
+      if (data && hasValidEndDate) {
+        try {
+          console.log(
+            "✅ EndDate provided, proceeding with reminder creation..."
+          );
 
-          const { error: remindersError } = await supabase
+          // Check if reminders table exists by attempting a simple query
+          const { error: tableCheckError } = await supabase
             .from("reminders")
-            .insert(reminderInserts);
+            .select("id")
+            .limit(0);
 
-          if (remindersError) {
-            console.error("Error creating reminders:", remindersError);
-            // Don't fail the subscription creation if reminders fail
+          if (tableCheckError) {
+            console.warn(
+              "⚠️ Reminders table not found. Please run the migration script first.",
+              tableCheckError
+            );
+            // Continue without creating reminders - subscription is already created
           } else {
             console.log(
-              `Created ${reminderDates.length} reminder entries for subscription ${data.id}`
+              "✅ Reminders table exists, generating reminder dates..."
             );
+
+            const { generateReminderDates } = await import(
+              "@/modules/Subscriptions/reminderUtils"
+            );
+
+            console.log("📅 Generating reminders with:", {
+              renewalDate: subscriptionData.renewalDate,
+              endDate: subscriptionData.endDate,
+              periodicity: subscriptionData.periodicity,
+              reminderOne: subscriptionData.reminderOne,
+              reminderTwo: subscriptionData.reminderTwo,
+              reminderThree: subscriptionData.reminderThree,
+            });
+
+            const reminderDates = generateReminderDates(
+              subscriptionData.renewalDate,
+              subscriptionData.endDate,
+              subscriptionData.periodicity,
+              subscriptionData.reminderOne,
+              subscriptionData.reminderTwo,
+              subscriptionData.reminderThree
+            );
+
+            console.log(`📊 Generated ${reminderDates.length} reminder dates`);
+
+            if (reminderDates.length > 0) {
+              console.log(
+                "📋 First 5 reminder dates:",
+                reminderDates.slice(0, 5)
+              );
+            }
+
+            if (reminderDates.length > 0) {
+              const reminderInserts = reminderDates.map((reminder) => ({
+                subscription_id: data.id,
+                reminder_date: reminder.date,
+                reminder_type: reminder.reminderType,
+                created_at: now,
+                updated_at: now,
+              }));
+
+              console.log("💾 Inserting reminders into database...", {
+                count: reminderInserts.length,
+                firstFew: reminderInserts.slice(0, 5),
+                subscriptionId: data.id,
+              });
+
+              const { data: insertedReminders, error: remindersError } =
+                await supabase
+                  .from("reminders")
+                  .insert(reminderInserts)
+                  .select();
+
+              if (remindersError) {
+                console.error("❌ Error creating reminders:", remindersError);
+                // Don't fail the subscription creation if reminders fail
+              } else {
+                console.log(
+                  `✅ Successfully created ${
+                    insertedReminders?.length || reminderDates.length
+                  } reminder entries for subscription ${data.id}`
+                );
+              }
+            } else {
+              console.warn(
+                "⚠️ No reminder dates generated. Check your dates and periodicity settings."
+              );
+            }
           }
+        } catch (reminderError) {
+          console.error("❌ Error generating reminders:", reminderError);
+          // Don't fail the subscription creation if reminder generation fails
         }
+      } else {
+        console.log("ℹ️ Skipping reminder creation:", {
+          reason: !data ? "No subscription data" : "No endDate provided",
+          endDate: subscriptionData.endDate,
+        });
       }
 
       return { data, error: null };
@@ -574,6 +649,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     subscriptionData: SubscriptionUpdate
   ) => {
     try {
+      // First, fetch the existing subscription to compare renewalDate
+      const { data: existingSubscription } = await supabase
+        .from("subscriptions")
+        .select("renewalDate, endDate, periodicity, reminderOne, reminderTwo, reminderThree")
+        .eq("id", id)
+        .single();
+
       const now = new Date().toISOString();
       const updateData = {
         ...subscriptionData,
@@ -594,57 +676,137 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { data: null, error };
       }
 
-      // Delete existing reminders and regenerate if endDate is provided
-      if (data && subscriptionData.endDate) {
-        // Delete existing reminders for this subscription
-        await supabase.from("reminders").delete().eq("subscriptionId", id);
+      // Check if renewalDate has changed
+      const renewalDateChanged =
+        subscriptionData.renewalDate &&
+        existingSubscription?.renewalDate !== subscriptionData.renewalDate;
 
-        // Generate and insert new reminder entries
-        const { generateReminderDates } = await import(
-          "@/modules/Subscriptions/reminderUtils"
-        );
+      console.log("🔍 Checking if reminders need to be regenerated...", {
+        renewalDateChanged,
+        oldRenewalDate: existingSubscription?.renewalDate,
+        newRenewalDate: subscriptionData.renewalDate,
+        hasEndDate: !!subscriptionData.endDate || !!existingSubscription?.endDate,
+      });
 
-        const renewalDate = subscriptionData.renewalDate || data.renewalDate;
-        const periodicity = subscriptionData.periodicity || data.periodicity;
-        const reminderOne =
-          subscriptionData.reminderOne || data.reminderOne;
-        const reminderTwo =
-          subscriptionData.reminderTwo || data.reminderTwo;
-        const reminderThree =
-          subscriptionData.reminderThree || data.reminderThree;
-
-        const reminderDates = generateReminderDates(
-          renewalDate,
-          subscriptionData.endDate,
-          periodicity,
-          reminderOne,
-          reminderTwo,
-          reminderThree
-        );
-
-        if (reminderDates.length > 0) {
-          const reminderInserts = reminderDates.map((reminder) => ({
-            subscriptionId: id,
-            reminderDate: reminder.date,
-            reminderType: reminder.reminderType,
-            createdAt: now,
-            updatedAt: now,
-          }));
-
-          const { error: remindersError } = await supabase
+      // Regenerate reminders if renewalDate changed and endDate exists
+      if (renewalDateChanged && (subscriptionData.endDate || existingSubscription?.endDate)) {
+        try {
+          // Check if reminders table exists by attempting a simple query
+          const { error: tableCheckError } = await supabase
             .from("reminders")
-            .insert(reminderInserts);
+            .select("id")
+            .limit(0);
 
-          if (remindersError) {
-            console.error("Error updating reminders:", remindersError);
-            // Don't fail the subscription update if reminders fail
-          } else {
-            console.log(
-              `Updated ${reminderDates.length} reminder entries for subscription ${id}`
+          if (tableCheckError) {
+            console.warn(
+              "⚠️ Reminders table not found. Please run the migration script first.",
+              tableCheckError
             );
+            // Continue without updating reminders - subscription is already updated
+          } else {
+            console.log("🗑️ Deleting existing reminders for subscription:", id);
+            
+            // Delete existing reminders for this subscription
+            const { error: deleteError } = await supabase
+              .from("reminders")
+              .delete()
+              .eq("subscription_id", id);
+
+            if (deleteError) {
+              console.error("❌ Error deleting existing reminders:", deleteError);
+            } else {
+              console.log("✅ Successfully deleted existing reminders");
+            }
+
+            // Generate and insert new reminder entries
+            const { generateReminderDates } = await import(
+              "@/modules/Subscriptions/reminderUtils"
+            );
+
+            const renewalDate = subscriptionData.renewalDate || data.renewalDate;
+            const endDate = subscriptionData.endDate || existingSubscription?.endDate || data.endDate;
+            const periodicity =
+              subscriptionData.periodicity || data.periodicity;
+            const reminderOne =
+              subscriptionData.reminderOne || data.reminderOne;
+            const reminderTwo =
+              subscriptionData.reminderTwo || data.reminderTwo;
+            const reminderThree =
+              subscriptionData.reminderThree || data.reminderThree;
+
+            if (!endDate) {
+              console.warn("⚠️ No endDate available, skipping reminder generation");
+            } else {
+              console.log("📅 Generating new reminders with:", {
+                renewalDate,
+                endDate,
+                periodicity,
+                reminderOne,
+                reminderTwo,
+                reminderThree,
+              });
+
+              const reminderDates = generateReminderDates(
+                renewalDate,
+                endDate,
+                periodicity,
+                reminderOne,
+                reminderTwo,
+                reminderThree
+              );
+
+              console.log(`📊 Generated ${reminderDates.length} reminder dates`);
+
+              if (reminderDates.length > 0) {
+                const reminderInserts = reminderDates.map((reminder) => ({
+                  subscription_id: id,
+                  reminder_date: reminder.date,
+                  reminder_type: reminder.reminderType,
+                  created_at: now,
+                  updated_at: now,
+                }));
+
+                console.log("💾 Inserting new reminders into database...", {
+                  count: reminderInserts.length,
+                  firstFew: reminderInserts.slice(0, 5),
+                });
+
+                const { data: insertedReminders, error: remindersError } =
+                  await supabase
+                    .from("reminders")
+                    .insert(reminderInserts)
+                    .select();
+
+                if (remindersError) {
+                  console.error("❌ Error updating reminders:", remindersError);
+                  // Don't fail the subscription update if reminders fail
+                } else {
+                  console.log(
+                    `✅ Successfully created ${
+                      insertedReminders?.length || reminderDates.length
+                    } reminder entries for subscription ${id}`
+                  );
+                }
+              } else {
+                console.warn(
+                  "⚠️ No reminder dates generated. Check your dates and periodicity settings."
+                );
+              }
+            }
           }
+        } catch (reminderError) {
+          console.error("❌ Error generating reminders:", reminderError);
+          // Don't fail the subscription update if reminder generation fails
         }
-      }
+      } else {
+          console.log("ℹ️ Skipping reminder regeneration:", {
+            reason: renewalDateChanged
+              ? "No endDate provided"
+              : "Renewal date unchanged",
+            renewalDateChanged,
+            hasEndDate: !!subscriptionData.endDate || !!existingSubscription?.endDate,
+          });
+        }
 
       return { data, error: null };
     } catch (error) {

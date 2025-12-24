@@ -7,7 +7,7 @@ import {
   Rewind,
   X,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export interface DatePickerProps {
   value?: string;
@@ -31,24 +31,40 @@ interface CalendarDay {
 }
 
 export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
-  ({
-    value,
-    onChange,
-    label,
-    error,
-    helperText,
-    placeholder = "Select date",
-    disabled = false,
-    className,
-    minDate,
-    maxDate,
-  }) => {
+  (
+    {
+      value,
+      onChange,
+      label,
+      error,
+      helperText,
+      placeholder = "Select date",
+      disabled = false,
+      className,
+      minDate,
+      maxDate,
+    },
+    ref
+  ) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(
       value ? new Date(value) : null
     );
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Merge forwarded ref with internal ref
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        containerRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -218,7 +234,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     });
 
     return (
-      <div className="w-full" ref={containerRef}>
+      <div className="w-full" ref={setRefs}>
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
