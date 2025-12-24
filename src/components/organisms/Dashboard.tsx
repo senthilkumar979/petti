@@ -3,7 +3,7 @@
 import { Card } from "@/components/atoms/Card";
 import { useAuth } from "@/lib/auth-context";
 import { Contact, Note, Subscription } from "@/types/database";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import DocumentStats from "./Dashboard/DocumentStats";
 import RecentContacts from "./Dashboard/RecentContacts";
 import RecentNotes from "./Dashboard/RecentNotes";
@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedOnceRef = useRef(false);
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -233,8 +234,22 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("📊 Dashboard: Tab is hidden, skipping loadDashboardData");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("📊 Dashboard: Already loaded, skipping on tab focus");
+      return;
+    }
+
     if (!authLoading && user) {
-      loadDashboardData();
+      loadDashboardData().then(() => {
+        hasLoadedOnceRef.current = true;
+      });
     }
   }, [authLoading, user, loadDashboardData]);
 

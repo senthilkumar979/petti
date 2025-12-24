@@ -7,6 +7,8 @@ import { useState } from "react";
 export default function EmailSettings() {
   const [smtpConfig, setSmtpConfig] = useState<SMTPConfig | null>(null);
 
+  console.log("🟣 EmailSettings: Component rendered");
+
   const handleConfigChange = (config: SMTPConfig | null) => {
     setSmtpConfig(config);
   };

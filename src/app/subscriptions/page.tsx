@@ -12,7 +12,7 @@ import { SubscriptionList } from "@/modules/Subscriptions/SubscriptionList";
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
 import { Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 export default function SubscriptionsPage() {
   const {
@@ -40,6 +40,7 @@ export default function SubscriptionsPage() {
   const [subscriptionToDelete, setSubscriptionToDelete] =
     useState<Subscription | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasLoadedOnceRef = useRef(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -84,8 +85,22 @@ export default function SubscriptionsPage() {
 
   // Load data on component mount
   useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("💳 SubscriptionsPage: Tab is hidden, skipping loadData");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("💳 SubscriptionsPage: Already loaded, skipping on tab focus");
+      return;
+    }
+
     if (user) {
-      loadData();
+      loadData().then(() => {
+        hasLoadedOnceRef.current = true;
+      });
     }
   }, [user, loadData]);
 

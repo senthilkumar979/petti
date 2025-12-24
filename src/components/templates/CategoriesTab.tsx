@@ -32,7 +32,7 @@ export const CategoriesTab = ({
   description,
 }: CategoriesTabProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -46,11 +46,28 @@ export const CategoriesTab = ({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  useEffect(() => {
+    console.log("🟢 CategoriesTab: Component mounted/updated", {
+      tableName,
+      loading,
+      categoriesCount: categories.length,
+      hasError: !!error,
+    });
+  });
 
+  const fetchCategories = useCallback(async () => {
+    console.log("🟢 CategoriesTab: fetchCategories called", {
+      tableName,
+      currentCategoriesCount: categories.length,
+      currentLoading: loading,
+    });
+    
+    setLoading(true);
+    setError(null);
+
+    console.log("🟢 CategoriesTab: Loading state set to true", { tableName });
+
+    try {
       const { data, error: fetchError } = await supabase
         .from(tableName)
         .select("*")
@@ -60,15 +77,36 @@ export const CategoriesTab = ({
         throw fetchError;
       }
 
+      console.log("🟢 CategoriesTab: Data fetched successfully", {
+        tableName,
+        count: data?.length || 0,
+      });
+
       setCategories(data || []);
     } catch (err) {
+      console.error("🟢 CategoriesTab: Error fetching categories", {
+        tableName,
+        error: err,
+      });
       setError(
         err instanceof Error ? err.message : "Failed to fetch categories"
       );
     } finally {
+      console.log("🟢 CategoriesTab: Setting loading to false", {
+        tableName,
+        categoriesCount: categories.length,
+      });
       setLoading(false);
     }
   }, [tableName]);
+
+  useEffect(() => {
+    console.log("🟢 CategoriesTab: useEffect triggered", {
+      tableName,
+      fetchCategoriesFunction: typeof fetchCategories,
+    });
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleUpdateCategory = async (id: string) => {
     if (!editingName.trim()) return;
@@ -179,7 +217,18 @@ export const CategoriesTab = ({
     fetchCategories();
   }, [fetchCategories]);
 
-  if (loading) {
+  // Only show full-page loader if we're loading AND have no data
+  const shouldShowLoader = loading && categories.length === 0;
+  
+  console.log("🟢 CategoriesTab: Render check", {
+    tableName,
+    loading,
+    categoriesCount: categories.length,
+    shouldShowLoader,
+  });
+
+  if (shouldShowLoader) {
+    console.log("🟢 CategoriesTab: Showing loader", { tableName });
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center">

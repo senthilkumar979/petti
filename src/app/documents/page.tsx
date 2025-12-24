@@ -23,7 +23,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import DocumentIcon from "../../components/atoms/DocumentIcon";
 
 type ViewMode = "grid" | "list";
@@ -64,6 +64,7 @@ export default function DocumentsPage() {
   >(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [viewStyle, setViewStyle] = useState<"grid" | "table">("grid");
+  const hasLoadedOnceRef = useRef(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -121,8 +122,22 @@ export default function DocumentsPage() {
   }, [fetchDocuments, fetchDocumentCategories, fetchAllUsers]);
 
   useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("📄 DocumentsPage: Tab is hidden, skipping loadData");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("📄 DocumentsPage: Already loaded, skipping on tab focus");
+      return;
+    }
+
     if (!authLoading && user) {
-      loadData();
+      loadData().then(() => {
+        hasLoadedOnceRef.current = true;
+      });
     }
   }, [authLoading, user, loadData]);
 

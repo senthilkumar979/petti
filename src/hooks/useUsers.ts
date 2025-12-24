@@ -25,17 +25,28 @@ export const useUsers = () => {
   } = useQuery({
     queryKey: ["users"],
     queryFn: async (): Promise<UserType[]> => {
+      console.log("🟡 useUsers: Fetching users");
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .order("addedOn", { ascending: false });
 
       if (error) {
+        console.error("🟡 useUsers: Error fetching users", error);
         throw new Error(error.message);
       }
 
+      console.log("🟡 useUsers: Users fetched successfully", {
+        count: data?.length || 0,
+      });
       return data || [];
     },
+  });
+
+  console.log("🟡 useUsers: Hook state", {
+    isLoading,
+    usersCount: users.length,
+    hasError: !!error,
   });
 
   // Upload picture to Supabase Storage

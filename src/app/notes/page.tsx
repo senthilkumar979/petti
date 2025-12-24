@@ -22,7 +22,7 @@ import {
 } from "@/modules/Notes/noteUtils";
 import { Note, NoteCategory } from "@/types/database";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 type ViewMode = "list" | "grid";
 
@@ -74,6 +74,7 @@ export default function NotesPage() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(30);
+  const hasLoadedOnceRef = useRef(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -117,8 +118,22 @@ export default function NotesPage() {
 
   // Load notes and categories on component mount
   useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("📝 NotesPage: Tab is hidden, skipping loadData");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("📝 NotesPage: Already loaded, skipping on tab focus");
+      return;
+    }
+
     if (user) {
-      loadData();
+      loadData().then(() => {
+        hasLoadedOnceRef.current = true;
+      });
     }
   }, [user, loadData]);
 

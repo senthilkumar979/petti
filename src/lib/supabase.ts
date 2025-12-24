@@ -57,5 +57,18 @@ const createMockClient = () => {
 export const supabase =
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+        db: {
+          schema: "public",
+        },
+        global: {
+          headers: {
+            "x-client-info": "petti-app",
+          },
+        },
+      })
     : (createMockClient() as unknown as ReturnType<typeof createClient>);

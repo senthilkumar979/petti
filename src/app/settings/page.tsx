@@ -30,6 +30,18 @@ export default function SettingsPage() {
   } = useUsers();
 
   useEffect(() => {
+    console.log("🔵 SettingsPage: Component mounted/updated", {
+      authLoading,
+      hasUser: !!user,
+      activeTab,
+    });
+  });
+
+  useEffect(() => {
+    console.log("🔵 SettingsPage: Tab changed", { activeTab });
+  }, [activeTab]);
+
+  useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
     }
@@ -96,7 +108,13 @@ export default function SettingsPage() {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    console.log("🔵 SettingsPage: Tab button clicked", {
+                      from: activeTab,
+                      to: tab.id,
+                    });
+                    setActiveTab(tab.id);
+                  }}
                   className={`py-2 px-1 md:border-b-2 lg:border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"

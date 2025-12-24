@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
@@ -36,6 +37,8 @@ interface AuthContextType {
   user: SupabaseUser | null;
   userProfile: User | null;
   loading: boolean;
+  allUsers: User[] | null; // Cached users list
+  allUsersLoading: boolean; // Loading state for users
   signUp: (
     email: string,
     password: string,
@@ -166,6 +169,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState<User[] | null>(null);
+  const [allUsersLoading, setAllUsersLoading] = useState(false);
+  const fetchAllUsersPromiseRef = useRef<Promise<{
+    data: User[] | null;
+    error: unknown;
+  }> | null>(null);
 
   // Reset loading state on mount to prevent stale loading states
   useEffect(() => {
@@ -278,6 +287,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Refresh the user profile after update
       await fetchUserProfile(userId);
 
+      // Invalidate users cache
+      setAllUsers(null);
+
       return { error: null };
     } catch (error) {
       console.error("Error updating user:", error);
@@ -285,24 +297,155 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const fetchAllUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("addedOn", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching users:", error);
-        return { data: null, error };
-      }
-
-      return { data, error: null };
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      return { data: null, error };
+  const fetchAllUsers = useCallback(async () => {
+    // Return cached data if available and not loading
+    if (allUsers !== null && !allUsersLoading) {
+      console.log("👥 fetchAllUsers: Returning cached data", {
+        count: allUsers.length,
+      });
+      return { data: allUsers, error: null };
     }
-  };
+
+    // If a request is already in progress, return the existing promise
+    if (fetchAllUsersPromiseRef.current) {
+      console.log("👥 fetchAllUsers: Reusing existing request");
+      return fetchAllUsersPromiseRef.current;
+    }
+
+    // Create the request promise
+    const requestPromise = (async () => {
+      try {
+        setAllUsersLoading(true);
+        console.log("👥 fetchAllUsers: Starting to fetch users from Supabase");
+
+        // Check if Supabase is properly configured
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        console.log("👥 fetchAllUsers: Configuration check", {
+          hasUrl: !!supabaseUrl,
+          hasKey: !!supabaseKey,
+          urlPreview: supabaseUrl?.substring(0, 30) + "...",
+          isMock: !supabaseUrl || !supabaseKey,
+        });
+
+        if (!supabaseUrl || !supabaseKey) {
+          console.warn(
+            "👥 fetchAllUsers: Supabase not configured, using mock data"
+          );
+          return { data: [], error: null };
+        }
+
+        const startTime = Date.now();
+        console.log(
+          "👥 fetchAllUsers: Executing Supabase query at",
+          new Date().toISOString()
+        );
+
+        // Create a timeout promise with a unique marker
+        const TIMEOUT_MARKER = Symbol("TIMEOUT");
+        const timeoutDuration = 30000; // 30 seconds
+        const timeoutPromise = new Promise<{
+          data: null;
+          error: Error;
+          [TIMEOUT_MARKER]: true;
+        }>((resolve) => {
+          setTimeout(() => {
+            console.error(
+              `👥 fetchAllUsers: TIMEOUT after ${
+                timeoutDuration / 1000
+              } seconds`
+            );
+            resolve({
+              data: null,
+              error: new Error(
+                `Request timeout after ${timeoutDuration / 1000} seconds`
+              ),
+              [TIMEOUT_MARKER]: true as const,
+            });
+          }, timeoutDuration);
+        });
+
+        // Execute the query with a limit to reduce data transfer
+        // This helps if the table is large or connection is slow
+        const queryPromise = supabase
+          .from("users")
+          .select("*")
+          .order("addedOn", { ascending: false })
+          .limit(1000); // Add reasonable limit to prevent huge queries
+
+        console.log("👥 fetchAllUsers: Racing query against timeout...");
+        const result = await Promise.race([queryPromise, timeoutPromise]);
+
+        // Check if we got a timeout result using the marker
+        if (TIMEOUT_MARKER in result && result[TIMEOUT_MARKER]) {
+          console.error("👥 fetchAllUsers: Timeout occurred");
+          const timeoutError = new Error(
+            "Request timeout after 30 seconds: Unable to connect to Supabase. Please check:\n" +
+              "1. Your internet connection\n" +
+              "2. Supabase project status at https://supabase.com/dashboard\n" +
+              "3. Your NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables"
+          );
+          return { data: null, error: timeoutError };
+        }
+
+        // It's a query result
+        const { data, error } = result as Awaited<typeof queryPromise>;
+
+        const duration = Date.now() - startTime;
+        console.log("👥 fetchAllUsers: Query completed", {
+          duration: `${duration}ms`,
+          hasError: !!error,
+          dataCount: data?.length || 0,
+          errorMessage: error
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : undefined,
+          errorCode:
+            error && typeof error === "object" && "code" in error
+              ? error.code
+              : undefined,
+        });
+
+        if (error) {
+          console.error("👥 fetchAllUsers: Error fetching users", {
+            error,
+            errorType: typeof error,
+            errorKeys:
+              error && typeof error === "object" ? Object.keys(error) : [],
+          });
+          return { data: null, error };
+        }
+
+        console.log("👥 fetchAllUsers: Successfully fetched users", {
+          count: data?.length || 0,
+        });
+
+        // Cache the result
+        if (data) {
+          setAllUsers(data);
+        }
+
+        return { data, error: null };
+      } catch (error) {
+        console.error("👥 fetchAllUsers: Exception caught", {
+          error,
+          errorType: typeof error,
+          errorMessage: error instanceof Error ? error.message : String(error),
+        });
+        return { data: null, error };
+      } finally {
+        // Clear the ref and loading state when the request completes
+        fetchAllUsersPromiseRef.current = null;
+        setAllUsersLoading(false);
+      }
+    })();
+
+    // Store the promise in the ref
+    fetchAllUsersPromiseRef.current = requestPromise;
+    return requestPromise;
+  }, [allUsers, allUsersLoading]);
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
@@ -427,6 +570,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log("User profile created successfully:", data);
+
+      // Invalidate users cache
+      setAllUsers(null);
+
       return { error: null };
     } catch (error) {
       console.error("Unexpected error creating user profile:", error);
@@ -474,6 +621,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log("First user profile created successfully:", data);
+
+      // Invalidate users cache
+      setAllUsers(null);
+
       return { error: null };
     } catch (error) {
       console.error("Unexpected error creating first user profile:", error);
@@ -535,7 +686,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscriptionId: data?.id,
       });
 
-      if (data && hasValidEndDate) {
+      if (data && hasValidEndDate && subscriptionData.endDate) {
         try {
           console.log(
             "✅ EndDate provided, proceeding with reminder creation..."
@@ -652,7 +803,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // First, fetch the existing subscription to compare renewalDate
       const { data: existingSubscription } = await supabase
         .from("subscriptions")
-        .select("renewalDate, endDate, periodicity, reminderOne, reminderTwo, reminderThree")
+        .select(
+          "renewalDate, endDate, periodicity, reminderOne, reminderTwo, reminderThree"
+        )
         .eq("id", id)
         .single();
 
@@ -685,11 +838,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         renewalDateChanged,
         oldRenewalDate: existingSubscription?.renewalDate,
         newRenewalDate: subscriptionData.renewalDate,
-        hasEndDate: !!subscriptionData.endDate || !!existingSubscription?.endDate,
+        hasEndDate:
+          !!subscriptionData.endDate || !!existingSubscription?.endDate,
       });
 
       // Regenerate reminders if renewalDate changed and endDate exists
-      if (renewalDateChanged && (subscriptionData.endDate || existingSubscription?.endDate)) {
+      if (
+        renewalDateChanged &&
+        (subscriptionData.endDate || existingSubscription?.endDate)
+      ) {
         try {
           // Check if reminders table exists by attempting a simple query
           const { error: tableCheckError } = await supabase
@@ -705,7 +862,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Continue without updating reminders - subscription is already updated
           } else {
             console.log("🗑️ Deleting existing reminders for subscription:", id);
-            
+
             // Delete existing reminders for this subscription
             const { error: deleteError } = await supabase
               .from("reminders")
@@ -713,7 +870,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               .eq("subscription_id", id);
 
             if (deleteError) {
-              console.error("❌ Error deleting existing reminders:", deleteError);
+              console.error(
+                "❌ Error deleting existing reminders:",
+                deleteError
+              );
             } else {
               console.log("✅ Successfully deleted existing reminders");
             }
@@ -723,8 +883,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               "@/modules/Subscriptions/reminderUtils"
             );
 
-            const renewalDate = subscriptionData.renewalDate || data.renewalDate;
-            const endDate = subscriptionData.endDate || existingSubscription?.endDate || data.endDate;
+            const renewalDate =
+              subscriptionData.renewalDate || data.renewalDate;
+            const endDate =
+              subscriptionData.endDate ||
+              existingSubscription?.endDate ||
+              data.endDate;
             const periodicity =
               subscriptionData.periodicity || data.periodicity;
             const reminderOne =
@@ -735,7 +899,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               subscriptionData.reminderThree || data.reminderThree;
 
             if (!endDate) {
-              console.warn("⚠️ No endDate available, skipping reminder generation");
+              console.warn(
+                "⚠️ No endDate available, skipping reminder generation"
+              );
             } else {
               console.log("📅 Generating new reminders with:", {
                 renewalDate,
@@ -755,7 +921,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 reminderThree
               );
 
-              console.log(`📊 Generated ${reminderDates.length} reminder dates`);
+              console.log(
+                `📊 Generated ${reminderDates.length} reminder dates`
+              );
 
               if (reminderDates.length > 0) {
                 const reminderInserts = reminderDates.map((reminder) => ({
@@ -799,14 +967,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Don't fail the subscription update if reminder generation fails
         }
       } else {
-          console.log("ℹ️ Skipping reminder regeneration:", {
-            reason: renewalDateChanged
-              ? "No endDate provided"
-              : "Renewal date unchanged",
-            renewalDateChanged,
-            hasEndDate: !!subscriptionData.endDate || !!existingSubscription?.endDate,
-          });
-        }
+        console.log("ℹ️ Skipping reminder regeneration:", {
+          reason: renewalDateChanged
+            ? "No endDate provided"
+            : "Renewal date unchanged",
+          renewalDateChanged,
+          hasEndDate:
+            !!subscriptionData.endDate || !!existingSubscription?.endDate,
+        });
+      }
 
       return { data, error: null };
     } catch (error) {
@@ -1356,6 +1525,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     userProfile,
     loading,
+    allUsers,
+    allUsersLoading,
     signUp,
     signIn,
     signOut,

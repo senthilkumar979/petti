@@ -35,23 +35,27 @@ export default function SMTPConfiguration({
   const [testResult, setTestResult] = useState<any>(null);
   const [message, setMessage] = useState("");
 
-  // Load existing configuration
   useEffect(() => {
+    console.log("🟣 SMTPConfiguration: Component mounted");
     loadConfig();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadConfig = async () => {
+    console.log("🟣 SMTPConfiguration: Loading config");
     try {
       const response = await fetch("/api/smtp/config");
       const data = await response.json();
 
       if (data.success && data.config) {
+        console.log("🟣 SMTPConfiguration: Config loaded successfully");
         setConfig(data.config);
         onConfigChange?.(data.config);
+      } else {
+        console.log("🟣 SMTPConfiguration: No config found");
       }
     } catch (error) {
-      console.error("Error loading SMTP config:", error);
+      console.error("🟣 SMTPConfiguration: Error loading SMTP config:", error);
     }
   };
 

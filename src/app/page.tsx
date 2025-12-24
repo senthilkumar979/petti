@@ -3,8 +3,8 @@
 import { useAuth } from "@/lib/auth-context";
 import { registerServiceWorker } from "@/lib/pwa";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "../components/atoms/Card";
 import Dashboard from "../components/organisms/Dashboard";
 import { Header } from "../components/organisms/Header/Header";
@@ -13,69 +13,127 @@ export default function HomePage() {
   const { fetchAllUsers, loading: authLoading, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const hasLoadedOnceRef = useRef(false);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     // Register service worker for PWA functionality
     registerServiceWorker();
+  }, []);
+
+  useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("🏠 HomePage: Tab is hidden, skipping loadUsers");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("🏠 HomePage: Already loaded, skipping on tab focus");
+      return;
+    }
+
+    console.log("🏠 HomePage: useEffect triggered", {
+      authLoading,
+      hasUser: !!user,
+    });
+
+    // Prevent multiple simultaneous calls
+    let isMounted = true;
 
     const loadUsers = async () => {
+      if (!isMounted) {
+        console.log("🏠 HomePage: Component unmounted, skipping loadUsers");
+        return;
+      }
+
       try {
+        console.log("🏠 HomePage: Starting to load users");
         setLoading(true);
         setError(null);
 
-        console.log("🔍 Auth Debug:", {
-          authLoading,
-          user: !!user,
-          showLogin,
-          pathname,
-          currentRoute: pathname,
+        const startTime = Date.now();
+        console.log("🏠 HomePage: Calling fetchAllUsers...");
+        const { data, error: fetchError } = await fetchAllUsers();
+        const duration = Date.now() - startTime;
+
+        if (!isMounted) {
+          console.log(
+            "🏠 HomePage: Component unmounted during fetch, ignoring result"
+          );
+          return;
+        }
+
+        console.log("🏠 HomePage: fetchAllUsers returned", {
+          duration: `${duration}ms`,
+          hasError: !!fetchError,
+          dataCount: data?.length || 0,
         });
 
-        const { data, error: fetchError } = await fetchAllUsers();
-
         if (fetchError) {
+          console.error("🏠 HomePage: Error fetching users", fetchError);
           setError(
             fetchError instanceof Error
               ? fetchError.message
               : "Failed to load users"
           );
+          setLoading(false);
           return;
         }
 
+        console.log("🏠 HomePage: Users fetched", {
+          count: data?.length || 0,
+          hasUser: !!user,
+        });
+
         // If no users exist, show admin setup
         if (!data || data.length === 0) {
-          console.log("📝 No users found, redirecting to setup");
+          console.log("🏠 HomePage: No users found, redirecting to setup");
           router.push("/setup");
-          setShowLogin(false);
-        } else {
-          // If users exist but no one is logged in, show login
-          if (!user) {
-            console.log("👤 No user logged in, showing login");
-            setShowLogin(true);
-          } else {
-            // User is logged in, show dashboard
-            console.log("✅ User logged in, showing dashboard");
-            setShowLogin(false);
-            setHasRedirected(false); // Reset redirect flag
-            // No need to redirect since we're already on the homepage
-          }
+          setLoading(false);
+          hasLoadedOnceRef.current = true;
+          return;
         }
-      } catch {
-        setError("An unexpected error occurred");
-      } finally {
+
+        // If users exist but no one is logged in, show login
+        if (!user) {
+          console.log("🏠 HomePage: No user logged in, redirecting to login");
+          if (!hasRedirected) {
+            setHasRedirected(true);
+            router.push("/login");
+          }
+          setLoading(false);
+          hasLoadedOnceRef.current = true;
+          return;
+        }
+
+        // User is logged in, show dashboard
+        console.log("🏠 HomePage: User logged in, showing dashboard");
         setLoading(false);
+        hasLoadedOnceRef.current = true;
+      } catch (err) {
+        console.error("🏠 HomePage: Unexpected error", err);
+        if (isMounted) {
+          setError("An unexpected error occurred");
+          setLoading(false);
+        }
       }
     };
 
     // Only load users if authentication is not loading
     if (!authLoading) {
       loadUsers();
+    } else {
+      console.log("🏠 HomePage: Waiting for auth to finish loading");
     }
-  }, [fetchAllUsers, router, authLoading, user, pathname, showLogin]);
+
+    return () => {
+      isMounted = false;
+      console.log("🏠 HomePage: Cleanup - component unmounting");
+    };
+  }, [authLoading, user, router, fetchAllUsers, hasRedirected]);
 
   if (authLoading || loading) {
     return (
@@ -95,14 +153,9 @@ export default function HomePage() {
     );
   }
 
-  if (showLogin) {
-    // Only redirect if we're not already on the login page and haven't redirected yet
-    if (pathname !== "/login" && !hasRedirected) {
-      console.log("🔄 Redirecting to login page");
-      setHasRedirected(true);
-      router.push("/login");
-    }
-    return null; // Prevent rendering the rest of the component
+  // If user is not logged in, the useEffect will handle redirect
+  if (!user && !authLoading && !loading) {
+    return null; // Prevent rendering while redirecting
   }
 
   if (error) {

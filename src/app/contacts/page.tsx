@@ -17,7 +17,7 @@ import { ContactsHeader } from "@/modules/Contacts/ContactsHeader";
 import { filterContacts, formatDate } from "@/modules/Contacts/contactUtils";
 import { Contact, ContactInsert } from "@/types/database";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 type ViewMode = "list" | "grid" | "table";
 
@@ -44,6 +44,7 @@ export default function ContactsPage() {
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isMobile, isTablet } = useMediaQuery();
+  const hasLoadedOnceRef = useRef(false);
 
   useEffect(() => {
     if (isMobile || isTablet) {
@@ -78,8 +79,22 @@ export default function ContactsPage() {
 
   // Load contacts on component mount
   useEffect(() => {
+    // Skip if tab is currently hidden (user switched away)
+    if (document.hidden) {
+      console.log("👤 ContactsPage: Tab is hidden, skipping loadContacts");
+      return;
+    }
+
+    // Skip if we've already loaded once and this is just a tab focus change
+    if (hasLoadedOnceRef.current) {
+      console.log("👤 ContactsPage: Already loaded, skipping on tab focus");
+      return;
+    }
+
     if (user) {
-      loadContacts();
+      loadContacts().then(() => {
+        hasLoadedOnceRef.current = true;
+      });
     }
   }, [user, loadContacts]);
 
