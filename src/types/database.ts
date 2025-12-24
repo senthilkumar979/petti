@@ -46,6 +46,7 @@ export interface Database {
           amount: number;
           currency: string;
           renewalDate: string;
+          endDate: string | null;
           reminderOne:
             | "1 day before"
             | "2 days before"
@@ -85,6 +86,7 @@ export interface Database {
           amount: number;
           currency: string;
           renewalDate: string;
+          endDate?: string | null;
           reminderOne:
             | "1 day before"
             | "2 days before"
@@ -124,6 +126,7 @@ export interface Database {
           amount?: number;
           currency?: string;
           renewalDate?: string;
+          endDate?: string | null;
           reminderOne?:
             | "1 day before"
             | "2 days before"
@@ -148,6 +151,32 @@ export interface Database {
           note?: string | null;
           lastModified?: string;
           modifiedBy?: string;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+      };
+      reminders: {
+        Row: {
+          id: string;
+          subscriptionId: string;
+          reminderDate: string;
+          reminderType: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
+          createdAt: string;
+          updatedAt: string;
+        };
+        Insert: {
+          id?: string;
+          subscriptionId: string;
+          reminderDate: string;
+          reminderType: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
+          createdAt?: string;
+          updatedAt?: string;
+        };
+        Update: {
+          id?: string;
+          subscriptionId?: string;
+          reminderDate?: string;
+          reminderType?: "reminderOne" | "reminderTwo" | "reminderThree" | "renewal";
           createdAt?: string;
           updatedAt?: string;
         };

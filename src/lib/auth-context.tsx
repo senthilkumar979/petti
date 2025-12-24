@@ -523,6 +523,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { data: null, error };
       }
 
+      // Generate and insert reminder entries if endDate is provided
+      if (data && subscriptionData.endDate) {
+        const { generateReminderDates } = await import(
+          "@/modules/Subscriptions/reminderUtils"
+        );
+
+        const reminderDates = generateReminderDates(
+          subscriptionData.renewalDate,
+          subscriptionData.endDate,
+          subscriptionData.periodicity,
+          subscriptionData.reminderOne,
+          subscriptionData.reminderTwo,
+          subscriptionData.reminderThree
+        );
+
+        if (reminderDates.length > 0) {
+          const reminderInserts = reminderDates.map((reminder) => ({
+            subscriptionId: data.id,
+            reminderDate: reminder.date,
+            reminderType: reminder.reminderType,
+            createdAt: now,
+            updatedAt: now,
+          }));
+
+          const { error: remindersError } = await supabase
+            .from("reminders")
+            .insert(reminderInserts);
+
+          if (remindersError) {
+            console.error("Error creating reminders:", remindersError);
+            // Don't fail the subscription creation if reminders fail
+          } else {
+            console.log(
+              `Created ${reminderDates.length} reminder entries for subscription ${data.id}`
+            );
+          }
+        }
+      }
+
       return { data, error: null };
     } catch (error) {
       console.error("Error creating subscription:", error);
@@ -553,6 +592,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) {
         console.error("Error updating subscription:", error);
         return { data: null, error };
+      }
+
+      // Delete existing reminders and regenerate if endDate is provided
+      if (data && subscriptionData.endDate) {
+        // Delete existing reminders for this subscription
+        await supabase.from("reminders").delete().eq("subscriptionId", id);
+
+        // Generate and insert new reminder entries
+        const { generateReminderDates } = await import(
+          "@/modules/Subscriptions/reminderUtils"
+        );
+
+        const renewalDate = subscriptionData.renewalDate || data.renewalDate;
+        const periodicity = subscriptionData.periodicity || data.periodicity;
+        const reminderOne =
+          subscriptionData.reminderOne || data.reminderOne;
+        const reminderTwo =
+          subscriptionData.reminderTwo || data.reminderTwo;
+        const reminderThree =
+          subscriptionData.reminderThree || data.reminderThree;
+
+        const reminderDates = generateReminderDates(
+          renewalDate,
+          subscriptionData.endDate,
+          periodicity,
+          reminderOne,
+          reminderTwo,
+          reminderThree
+        );
+
+        if (reminderDates.length > 0) {
+          const reminderInserts = reminderDates.map((reminder) => ({
+            subscriptionId: id,
+            reminderDate: reminder.date,
+            reminderType: reminder.reminderType,
+            createdAt: now,
+            updatedAt: now,
+          }));
+
+          const { error: remindersError } = await supabase
+            .from("reminders")
+            .insert(reminderInserts);
+
+          if (remindersError) {
+            console.error("Error updating reminders:", remindersError);
+            // Don't fail the subscription update if reminders fail
+          } else {
+            console.log(
+              `Updated ${reminderDates.length} reminder entries for subscription ${id}`
+            );
+          }
+        }
       }
 
       return { data, error: null };

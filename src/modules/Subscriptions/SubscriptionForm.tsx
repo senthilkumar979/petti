@@ -43,11 +43,14 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
     renewalDate: initialData?.renewalDate
       ? new Date(initialData.renewalDate).toISOString().split("T")[0]
       : "",
+    endDate: initialData?.endDate
+      ? new Date(initialData.endDate).toISOString().split("T")[0]
+      : "",
     reminderOne: initialData?.reminderOne || "1 day before",
     reminderTwo: initialData?.reminderTwo || "2 days before",
     reminderThree: initialData?.reminderThree || "1 week before",
     category: initialData?.category || "",
-    paidFor: initialData?.paidFor || users[0].id,
+    paidFor: initialData?.paidFor || users[0]?.id || "",
     provider: initialData?.provider || "",
     note: initialData?.note || "",
   });
@@ -84,6 +87,18 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
       newErrors.renewalDate = "Renewal date is required";
     }
 
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+    }
+
+    if (formData.renewalDate && formData.endDate) {
+      const renewal = new Date(formData.renewalDate);
+      const end = new Date(formData.endDate);
+      if (end <= renewal) {
+        newErrors.endDate = "End date must be after renewal date";
+      }
+    }
+
     if (!formData.category) {
       newErrors.category = "Category is required";
     }
@@ -108,6 +123,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         amount: Number(formData.amount),
         currency: formData.currency,
         renewalDate: formData.renewalDate,
+        endDate: formData.endDate,
         reminderOne: formData.reminderOne as Subscription["reminderOne"],
         reminderTwo: formData.reminderTwo as Subscription["reminderTwo"],
         reminderThree: formData.reminderThree as Subscription["reminderThree"],
@@ -195,6 +211,17 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             onChange={(date) => handleInputChange("renewalDate", date)}
             placeholder="Select renewal date"
             error={errors.renewalDate}
+          />
+        </div>
+
+        {/* End Date */}
+        <div>
+          <DatePicker
+            label="End Date"
+            value={formData.endDate}
+            onChange={(date) => handleInputChange("endDate", date)}
+            placeholder="Select end date"
+            error={errors.endDate}
           />
         </div>
 
