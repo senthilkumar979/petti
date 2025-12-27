@@ -77,6 +77,15 @@ interface AuthContextType {
     data: SubscriptionCategory[] | null;
     error: unknown;
   }>;
+  fetchRenewalReminders: () => Promise<{
+    data: Array<{
+      id: string;
+      subscription_id: string;
+      reminder_date: string;
+      subscription_name: string;
+    }> | null;
+    error: unknown;
+  }>;
   // Contact management functions
   fetchContacts: () => Promise<{
     data: Contact[] | null;
@@ -1022,6 +1031,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const fetchRenewalReminders = async () => {
+    try {
+      // Fetch reminders with reminder_type = "renewal" and join with subscriptions to get subscription names
+      const { data, error } = await supabase
+        .from("reminders")
+        .select(
+          `
+          id,
+          subscription_id,
+          reminder_date,
+          reminder_type,
+          subscriptions!inner(nameOfSubscription)
+        `
+        )
+        .eq("reminder_type", "renewal")
+        .order("reminder_date", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching renewal reminders:", error);
+        return { data: null, error };
+      }
+
+      // Transform the data to include subscription_name
+      const transformedData =
+        data?.map((reminder) => {
+          const subscription = reminder.subscriptions as unknown as {
+            nameOfSubscription: string;
+          };
+          return {
+            id: reminder.id,
+            subscription_id: reminder.subscription_id,
+            reminder_date: reminder.reminder_date,
+            subscription_name: subscription?.nameOfSubscription || "Unknown",
+          };
+        }) || null;
+
+      return { data: transformedData, error: null };
+    } catch (error) {
+      console.error("Error fetching renewal reminders:", error);
+      return { data: null, error };
+    }
+  };
+
   // Contact management functions
   const fetchContacts = async () => {
     try {
@@ -1540,6 +1592,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateSubscription,
     deleteSubscription,
     fetchSubscriptionCategories,
+    fetchRenewalReminders,
     fetchContacts,
     createContact,
     updateContact,

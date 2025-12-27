@@ -2,10 +2,18 @@
 
 import { Button } from "@/components/atoms/Button";
 import { Subscription, SubscriptionCategory, User } from "@/types/database";
+import { useAuth } from "@/lib/auth-context";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "../../../components/atoms/Badge";
 import { getCategoryColor, getCategoryName } from "./util";
+
+interface RenewalReminder {
+  id: string;
+  subscription_id: string;
+  reminder_date: string;
+  subscription_name: string;
+}
 
 interface CalendarViewProps {
   subscriptions: Subscription[];
@@ -20,29 +28,62 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   categories,
   onEdit,
 }) => {
+  const { fetchRenewalReminders } = useAuth();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [renewalReminders, setRenewalReminders] = useState<RenewalReminder[]>([]);
+  const [loadingReminders, setLoadingReminders] = useState(false);
+
+  // Fetch renewal reminders on mount and when month changes
+  useEffect(() => {
+    const loadRenewalReminders = async () => {
+      try {
+        setLoadingReminders(true);
+        const { data, error } = await fetchRenewalReminders();
+        if (error) {
+          console.error("Error loading renewal reminders:", error);
+          return;
+        }
+        if (data) {
+          setRenewalReminders(data);
+        }
+      } catch (err) {
+        console.error("Error loading renewal reminders:", err);
+      } finally {
+        setLoadingReminders(false);
+      }
+    };
+
+    loadRenewalReminders();
+  }, [fetchRenewalReminders, currentDate]);
 
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const getFirstDayOfMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  const getSubscriptionsForMonth = (date: Date) =>
-    subscriptions.filter((sub) => {
-      const renewalDate = new Date(sub.renewalDate);
+  // Get renewal reminders for a specific date
+  const getRenewalRemindersForDate = (date: Date) => {
+    const dateStr = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    return renewalReminders.filter((reminder) => {
+      const reminderDate = new Date(reminder.reminder_date);
       return (
-        renewalDate.getFullYear() === date.getFullYear() &&
-        renewalDate.getMonth() === date.getMonth()
+        reminderDate.getFullYear() === date.getFullYear() &&
+        reminderDate.getMonth() === date.getMonth() &&
+        reminderDate.getDate() === date.getDate()
       );
     });
-  const getSubscriptionsForDate = (date: Date) =>
-    subscriptions.filter((sub) => {
-      const renewalDate = new Date(sub.renewalDate);
+  };
+
+  const getSubscriptionsForMonth = (date: Date) => {
+    // Use renewal reminders for the month
+    const monthReminders = renewalReminders.filter((reminder) => {
+      const reminderDate = new Date(reminder.reminder_date);
       return (
-        renewalDate.getFullYear() === date.getFullYear() &&
-        renewalDate.getMonth() === date.getMonth() &&
-        renewalDate.getDate() === date.getDate()
+        reminderDate.getFullYear() === date.getFullYear() &&
+        reminderDate.getMonth() === date.getMonth()
       );
     });
+    return monthReminders;
+  };
 
   const navigateMonth = (direction: "prev" | "next") => {
     setCurrentDate((prev) => {
@@ -56,7 +97,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const daysInMonth = getDaysInMonth(currentDate);
   const firstDayOfMonth = getFirstDayOfMonth(currentDate);
-  const monthSubscriptions = getSubscriptionsForMonth(currentDate);
+  const monthReminders = getSubscriptionsForMonth(currentDate);
   const today = new Date();
   const isCurrentMonth =
     currentDate.getMonth() === today.getMonth() &&
@@ -74,7 +115,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       return {
         day,
         date,
-        subscriptions: getSubscriptionsForDate(date),
+        reminders: getRenewalRemindersForDate(date),
         isToday: isCurrentMonth && day === today.getDate(),
       };
     }),
@@ -105,8 +146,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </Button>
         </div>
         <div className="text-sm text-gray-500">
-          {monthSubscriptions.length} subscription
-          {monthSubscriptions.length !== 1 ? "s" : ""} this month
+          {monthReminders.length} renewal
+          {monthReminders.length !== 1 ? "s" : ""} this month
         </div>
       </div>
 
@@ -142,28 +183,37 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     {dayData.day}
                   </div>
                   <div className="space-y-1">
-                    {dayData.subscriptions.slice(0, 3).map((subscription) => {
+                    {dayData.reminders.slice(0, 3).map((reminder) => {
+                      // Find the subscription to get category for color
+                      const subscription = subscriptions.find(
+                        (sub) => sub.id === reminder.subscription_id
+                      );
                       return (
                         <Badge
-                          key={subscription.id}
-                          variant={getCategoryColor(
-                            categories,
-                            subscription.category
-                          )}
+                          key={reminder.id}
+                          variant={
+                            subscription
+                              ? getCategoryColor(categories, subscription.category)
+                              : "default"
+                          }
                           size="small"
                         >
                           <button
-                            onClick={() => onEdit(subscription)}
+                            onClick={() => {
+                              if (subscription) {
+                                onEdit(subscription);
+                              }
+                            }}
                             className="w-full text-left"
                           >
-                            {subscription.nameOfSubscription}
+                            {reminder.subscription_name}
                           </button>
                         </Badge>
                       );
                     })}
-                    {dayData.subscriptions.length > 3 && (
+                    {dayData.reminders.length > 3 && (
                       <div className="text-xs text-gray-500 text-center py-1">
-                        +{dayData.subscriptions.length - 3} more
+                        +{dayData.reminders.length - 3} more
                       </div>
                     )}
                   </div>
